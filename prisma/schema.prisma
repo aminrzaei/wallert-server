@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,19 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
-  id    Int     @default(autoincrement()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  name            String
+  password        String
+  phone           String
+  isEmailVerified Boolean   @default(false)
+  tracks          Track[]
+  contacts        Contact[]
+  tokens          Token[]
+  orders          Order[]
 }
 
-model Post {
-  id        Int      @default(autoincrement()) @id
-  title     String
-  content   String?
-  published Boolean? @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  Int?
+model Track {
+  id           Int      @id @default(autoincrement())
+  interval     Int
+  city         String
+  query        String
+  lastPostTime DateTime
+  contactType  String
+  userId       Int
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model Contact {
+  id          Int     @id @default(autoincrement())
+  type        String
+  isActivated Boolean @default(false)
+  address     String
+  userId      Int
+  user        User    @relation(fields: [userId], references: [id])
+}
+
+model Token {
+  id            Int     @id @default(autoincrement())
+  type          String
+  token         String
+  expires       String
+  isBlacklisted Boolean @default(false)
+  userId        Int
+  user          User    @relation(fields: [userId], references: [id])
+}
+
+model Order {
+  id              Int      @id @default(autoincrement())
+  date            DateTime
+  price           Int
+  description     String
+  transactionCode String
+  pid             String
+  userId          Int
+  user            User     @relation(fields: [userId], references: [id])
 }
