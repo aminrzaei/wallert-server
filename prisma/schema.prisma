@@ -12,7 +12,7 @@ model User {
   email           String    @unique
   name            String
   password        String
-  phone           String?   @unique
+  phone           String    @unique
   isEmailVerified Boolean   @default(false)
   tracks          Track[]
   contacts        Contact[]
