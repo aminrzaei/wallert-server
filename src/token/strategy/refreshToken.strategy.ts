@@ -1,7 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
-import { JwtPayload } from 'types';
+import { JwtPayload, TokenTypes } from 'types';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TokenService } from '../token.service';
 
@@ -29,6 +29,7 @@ export class RefreshTokenStrategy extends PassportStrategy(
   }
 
   validate(req: Request, payload: JwtPayload) {
+    if (payload.type !== TokenTypes.REFRESH) return null;
     const refreshToken = req.cookies.wallert_refresh_token;
     return { ...payload, refreshToken };
   }
