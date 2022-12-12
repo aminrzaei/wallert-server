@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as moment from 'moment';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { tokenTypes } from '../../config/tokens';
+import { TokenTypes } from 'types';
 
 @Injectable()
 export class TokenService {
@@ -12,12 +12,13 @@ export class TokenService {
     private jwt: JwtService,
     private prisma: PrismaService,
   ) {}
-  generateToken = (
-    userId,
-    expires,
-    type,
-    secret = this.config.get('jwt.jwtSecret'),
-  ) => {
+
+  generateToken(
+    userId: number,
+    expires: moment.Moment,
+    type: TokenTypes,
+    secret: string = this.config.get('jwt.jwtSecret'),
+  ) {
     const payload = {
       sub: userId,
       iat: moment().unix(),
@@ -27,20 +28,66 @@ export class TokenService {
     return this.jwt.sign(payload, {
       secret,
     });
-  };
+  }
 
-  saveToken = async (token, userId, expires, type, isBlacklisted = false) => {
+  async saveToken(
+    token: string,
+    userId: number,
+    expires: moment.Moment,
+    type: TokenTypes,
+    isBlacklisted = false,
+  ) {
     const tokenDoc = await this.prisma.token.create({
       data: {
         token,
         userId,
-        expires: expires.toDate(),
+        expires: expires.format(),
         type,
         isBlacklisted,
       },
     });
     return tokenDoc;
-  };
+  }
+
+  async generateAuthTokens(userId: number) {
+    const accessTokenExpires = moment().add(
+      this.config.get('jwt.accessExpirationMinutes'),
+      'minutes',
+    );
+
+    const accessToken = this.generateToken(
+      userId,
+      accessTokenExpires,
+      TokenTypes.ACCESS,
+    );
+    const refreshTokenExpires = moment().add(
+      this.config.get('jwt.refreshExpirationDays'),
+      'days',
+    );
+    const refreshToken = this.generateToken(
+      userId,
+      refreshTokenExpires,
+      TokenTypes.REFRESH,
+    );
+
+    await this.saveToken(
+      refreshToken,
+      userId,
+      refreshTokenExpires,
+      TokenTypes.REFRESH,
+    );
+
+    return {
+      access: {
+        token: accessToken,
+        expires: accessTokenExpires.toDate(),
+      },
+      refresh: {
+        token: refreshToken,
+        expires: refreshTokenExpires.toDate(),
+      },
+    };
+  }
 
   //   verifyToken = async (token, type) => {
   //     const payload = jwt.verify(token, config.jwt.secret);
@@ -55,46 +102,6 @@ export class TokenService {
   //     }
   //     return tokenDoc;
   //   };
-
-  generateAuthTokens = async (userId: number) => {
-    const accessTokenExpires = moment().add(
-      this.config.get('jwt.accessExpirationMinutes'),
-      'minutes',
-    );
-
-    const accessToken = this.generateToken(
-      userId,
-      accessTokenExpires,
-      tokenTypes.ACCESS,
-    );
-    const refreshTokenExpires = moment().add(
-      this.config.get('jwt.refreshExpirationDays'),
-      'days',
-    );
-    const refreshToken = this.generateToken(
-      userId,
-      refreshTokenExpires,
-      tokenTypes.REFRESH,
-    );
-
-    await this.saveToken(
-      refreshToken,
-      userId,
-      refreshTokenExpires,
-      tokenTypes.REFRESH,
-    );
-
-    return {
-      access: {
-        token: accessToken,
-        expires: accessTokenExpires.toDate(),
-      },
-      refresh: {
-        token: refreshToken,
-        expires: refreshTokenExpires.toDate(),
-      },
-    };
-  };
 
   //   generateResetPasswordToken = async (email) => {
   //     const user = await userService.getUserByEmail(email);

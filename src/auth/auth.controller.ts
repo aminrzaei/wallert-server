@@ -1,9 +1,19 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  Req,
+  Get,
+  UseGuards,
+} from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common/enums';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto';
 import { LoginDto } from './dto/login.dto';
+import { AccessTokenGuard } from './guards/accessToken.guard';
+import { RefreshTokenGuard } from './guards/refreshToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -15,9 +25,10 @@ export class AuthController {
   ) {
     const { user, tokens } = await this.authService.register(dto);
     const { access, refresh } = tokens;
+    const doUseSecureCoockie = process.env.NODE_ENV === 'production';
     res.cookie('wallert_refresh_token', refresh.token, {
       httpOnly: true,
-      secure: true,
+      secure: doUseSecureCoockie,
       sameSite: 'none',
       expires: refresh.expires,
     });
@@ -31,9 +42,10 @@ export class AuthController {
   ) {
     const { user, tokens } = await this.authService.login(dto);
     const { access, refresh } = tokens;
+    const doUseSecureCoockie = process.env.NODE_ENV === 'production';
     res.cookie('wallert_refresh_token', refresh.token, {
       httpOnly: true,
-      secure: true,
+      secure: doUseSecureCoockie,
       sameSite: 'none',
       expires: refresh.expires,
     });

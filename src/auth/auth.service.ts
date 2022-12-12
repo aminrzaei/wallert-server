@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { TokenService } from 'src/token/token.service';
 import { UserService } from 'src/user/user.service';
 import { RegisterDto } from './dto';
