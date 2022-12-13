@@ -10,4 +10,7 @@ export default () => ({
   database: {
     url: process.env.DATABASE_URL,
   },
+  frontend: {
+    url: process.env.FRONTEND_URL,
+  },
 });

@@ -7,12 +7,35 @@ import { EmailModule } from './email/email.module';
 import { TokenModule } from './token/token.module';
 import configuration from 'config/configuration';
 import { ConfigModule } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
+    }),
+    MailerModule.forRoot({
+      transport: {
+        host: process.env.EMAIL_HOST,
+        port: Number(process.env.EMAIL_PORT),
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      },
+      defaults: {
+        from: '"Wallert" <wallert@info.ir>',
+      },
+      template: {
+        dir: __dirname + '/email/templates',
+        adapter: new EjsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
     }),
     AuthModule,
     UserModule,

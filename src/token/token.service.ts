@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as moment from 'moment';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { UserService } from 'src/user/user.service';
 import { TokenTypes } from 'types';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class TokenService {
     private config: ConfigService,
     private jwt: JwtService,
     private prisma: PrismaService,
+    private userService: UserService,
   ) {}
 
   generateToken(
@@ -102,28 +104,28 @@ export class TokenService {
     return isTokenValid;
   }
 
-  //   generateResetPasswordToken = async (email) => {
-  //     const user = await userService.getUserByEmail(email);
-  //     if (!user) {
-  //       throw new ApiError(httpStatus.NOT_FOUND, 'کاربری با این ایمیل یافت نشد');
-  //     }
-  //     const expires = moment().add(
-  //       config.jwt.resetPasswordExpirationMinutes,
-  //       'minutes',
-  //     );
-  //     const resetPasswordToken = generateToken(
-  //       user.id,
-  //       expires,
-  //       tokenTypes.RESET_PASSWORD,
-  //     );
-  //     await saveToken(
-  //       resetPasswordToken,
-  //       user.id,
-  //       expires,
-  //       tokenTypes.RESET_PASSWORD,
-  //     );
-  //     return resetPasswordToken;
-  //   };
+  async generateResetPasswordToken(email: string) {
+    const user = await this.userService.getUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException('کاربری با این ایمیل یافت نشد');
+    }
+    const expires = moment().add(
+      this.config.get('jwt.resetExpirationMinutes'),
+      'minutes',
+    );
+    const resetPasswordToken = this.generateToken(
+      user.id,
+      expires,
+      TokenTypes.RESET_PASSWORD,
+    );
+    await this.saveToken(
+      resetPasswordToken,
+      user.id,
+      expires,
+      TokenTypes.RESET_PASSWORD,
+    );
+    return resetPasswordToken;
+  }
 
   //   generateVerifyEmailToken = async (user) => {
   //     const expires = moment().add(

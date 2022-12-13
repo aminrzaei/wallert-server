@@ -1,5 +1,4 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { NotFoundError } from '@prisma/client/runtime';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TokenService } from 'src/token/token.service';
 import { UserService } from 'src/user/user.service';
@@ -57,20 +56,18 @@ export class AuthService {
     });
   }
 
-  // refreshAuth = async (refreshToken) => {
-  //   try {
-  //     const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-  //     const user = await userService.getUserById(refreshTokenDoc.user);
-  //     if (!user) {
-  //       throw new Error();
-  //     }
-  //     await refreshTokenDoc.remove();
-  //     const tokens = await tokenService.generateAuthTokens(user);
-  //     return { user, tokens };
-  //   } catch (error) {
-  //     throw new ApiError(httpStatus.UNAUTHORIZED, 'لطفاوارد شوید');
-  //   }
-  // };
+  async refreshAuth(refreshToken: string) {
+    const tokenDoc = await this.prisma.token.findFirst({
+      where: { token: refreshToken },
+    });
+    await this.prisma.token.delete({ where: { id: tokenDoc.id } });
+    const tokens = await this.tokenService.generateAuthTokens(tokenDoc.userId);
+    const user = await this.prisma.user.findUnique({
+      where: { id: tokenDoc.userId },
+    });
+    delete user.password;
+    return { user, tokens };
+  }
 
   // resetPassword = async (resetPasswordToken, newPassword) => {
   //   try {
