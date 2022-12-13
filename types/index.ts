@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export type JwtPayload = {
   sub: number;
   iat: number;
@@ -10,4 +12,8 @@ export enum TokenTypes {
   REFRESH = 'refresh',
   RESET_PASSWORD = 'resetPassword',
   VERIFY_EMAIL = 'verifyEmail',
+}
+
+export interface IUserRequest extends Request {
+  user: any;
 }

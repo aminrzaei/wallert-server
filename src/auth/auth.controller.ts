@@ -1,9 +1,19 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  UseGuards,
+  Req,
+  Get,
+} from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common/enums';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { IUserRequest } from 'types';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenGuard } from './guards/refreshToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -40,5 +50,42 @@ export class AuthController {
       expires: refresh.expires,
     });
     res.status(HttpStatus.OK).send({ user, access_token: access });
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Post('logout')
+  logout(@Req() req: IUserRequest) {
+    const refreshToken = req.user.refreshToken;
+    return this.authService.logout(refreshToken);
+  }
+
+  @UseGuards(RefreshTokenGuard)
+  @Get('me')
+  me(@Req() req: Request) {
+    return req.user;
+  }
+
+  @Post('refresh-tokens')
+  refreshToken() {
+    return 'refresh-tokens';
+  }
+
+  @Post('forgot-password')
+  forgotPassword() {
+    return 'forgot-password';
+  }
+  @Post('reset-password')
+  resetPassword() {
+    return 'reset-password';
+  }
+
+  @Post('send-verification-email')
+  sendVerificationEmail() {
+    return 'send-verification-email';
+  }
+
+  @Post('verify-email')
+  verifyEmail() {
+    return 'verify-email';
   }
 }

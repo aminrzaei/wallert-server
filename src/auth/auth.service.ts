@@ -1,6 +1,9 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
+import { NotFoundError } from '@prisma/client/runtime';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { TokenService } from 'src/token/token.service';
 import { UserService } from 'src/user/user.service';
+import { TokenTypes } from 'types';
 import { RegisterDto } from './dto';
 import { LoginDto } from './dto/login.dto';
 
@@ -9,6 +12,7 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private tokenService: TokenService,
+    private prisma: PrismaService,
   ) {}
   async register(dto: RegisterDto) {
     const user = await this.userService.createUser(dto);
@@ -35,13 +39,23 @@ export class AuthService {
     return user;
   }
 
-  // logout = async (refreshToken) => {
-  //   const refreshTokenDoc = await Token.findOne({ token: refreshToken, type: tokenTypes.REFRESH, blacklisted: false });
-  //   if (!refreshTokenDoc) {
-  //     throw new ApiError(httpStatus.NOT_FOUND, 'یافت نشد');
-  //   }
-  //   await refreshTokenDoc.remove();
-  // };
+  async logout(refreshToken: string) {
+    const refreshTokenDoc = await this.prisma.token.findFirst({
+      where: {
+        token: refreshToken,
+        type: TokenTypes.REFRESH,
+        isBlacklisted: false,
+      },
+    });
+    if (!refreshTokenDoc) {
+      throw new ForbiddenException('توکن کورد نظر یافت نشد');
+    }
+    await this.prisma.token.delete({
+      where: {
+        id: refreshTokenDoc.id,
+      },
+    });
+  }
 
   // refreshAuth = async (refreshToken) => {
   //   try {

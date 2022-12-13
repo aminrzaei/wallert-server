@@ -89,19 +89,18 @@ export class TokenService {
     };
   }
 
-  //   verifyToken = async (token, type) => {
-  //     const payload = jwt.verify(token, config.jwt.secret);
-  //     const tokenDoc = await Token.findOne({
-  //       token,
-  //       type,
-  //       user: payload.sub,
-  //       blacklisted: false,
-  //     });
-  //     if (!tokenDoc) {
-  //       throw new Error('توکن اعتبارسنجی شما یافت است');
-  //     }
-  //     return tokenDoc;
-  //   };
+  async verifyToken(token: string, type: TokenTypes, userId: number) {
+    const tokenDoc = await this.prisma.token.findFirst({
+      where: {
+        type,
+        token,
+        userId,
+        isBlacklisted: false,
+      },
+    });
+    const isTokenValid = !!tokenDoc;
+    return isTokenValid;
+  }
 
   //   generateResetPasswordToken = async (email) => {
   //     const user = await userService.getUserByEmail(email);
