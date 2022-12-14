@@ -1,8 +1,13 @@
 import * as argon from 'argon2';
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { RegisterDto } from 'src/auth/dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -40,33 +45,44 @@ export class UserService {
     const pwMatches = await argon.verify(dbHash, requestPassword);
     return pwMatches;
   }
+
+  async getUserById(id: number) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id,
+      },
+    });
+    return user;
+  }
+
+  async updateUserById(userId: number, updateBody: Partial<User>) {
+    try {
+      if (updateBody.password) {
+        const hashedPassword = await argon.hash(updateBody.password);
+        updateBody.password = hashedPassword;
+      }
+      const updatedUser = await this.prisma.user.update({
+        where: {
+          id: userId,
+        },
+        data: updateBody,
+      });
+      return updatedUser;
+    } catch (err) {
+      if (err instanceof PrismaClientKnownRequestError) {
+        if (err.code === 'P2002') {
+          throw new ForbiddenException(
+            'کاربر با اطلاعات وارد شده موجود می باشد',
+          );
+        }
+      }
+      throw err;
+    }
+  }
 }
 //   queryUsers = async (filter, options) => {
 //     const users = await User.paginate(filter, options);
 //     return users;
-//   };
-
-//   getUserById = async (id) => {
-//     return User.findById(id);
-//   };
-
-//   updateUserById = async (userId, updateBody) => {
-//     const user = await getUserById(userId);
-//     if (!user) {
-//       throw new ApiError(httpStatus.NOT_FOUND, 'کاربر یافت نشد');
-//     }
-//     if (
-//       updateBody.email &&
-//       (await User.isEmailTaken(updateBody.email, userId))
-//     ) {
-//       throw new ApiError(
-//         httpStatus.BAD_REQUEST,
-//         'این ایمیل قبلا استفاده شده است',
-//       );
-//     }
-//     Object.assign(user, updateBody);
-//     await user.save();
-//     return user;
 //   };
 
 //   deleteUserById = async (userId) => {

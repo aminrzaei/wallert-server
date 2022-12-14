@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as moment from 'moment';
@@ -91,7 +95,7 @@ export class TokenService {
     };
   }
 
-  async verifyToken(token: string, type: TokenTypes, userId: number) {
+  async validateToken(token: string, type: TokenTypes, userId: number) {
     const tokenDoc = await this.prisma.token.findFirst({
       where: {
         type,
@@ -102,6 +106,19 @@ export class TokenService {
     });
     const isTokenValid = !!tokenDoc;
     return isTokenValid;
+  }
+
+  async verifyToken(token: string) {
+    return this.jwt
+      .verifyAsync(token, {
+        secret: this.config.get('jwt.jwtSecret'),
+      })
+      .then((val) => {
+        return val;
+      })
+      .catch(() => {
+        throw new UnauthorizedException('توکن منقضی شده است');
+      });
   }
 
   async generateResetPasswordToken(email: string) {
@@ -127,22 +144,22 @@ export class TokenService {
     return resetPasswordToken;
   }
 
-  //   generateVerifyEmailToken = async (user) => {
-  //     const expires = moment().add(
-  //       config.jwt.verifyEmailExpirationMinutes,
-  //       'minutes',
-  //     );
-  //     const verifyEmailToken = generateToken(
-  //       user.id,
-  //       expires,
-  //       tokenTypes.VERIFY_EMAIL,
-  //     );
-  //     await saveToken(
-  //       verifyEmailToken,
-  //       user.id,
-  //       expires,
-  //       tokenTypes.VERIFY_EMAIL,
-  //     );
-  //     return verifyEmailToken;
-  //   };
+  async generateVerifyEmailToken(userId: number) {
+    const expires = moment().add(
+      this.config.get('jwt.verifyEmailExpirationMinutes'),
+      'minutes',
+    );
+    const verifyEmailToken = this.generateToken(
+      userId,
+      expires,
+      TokenTypes.VERIFY_EMAIL,
+    );
+    await this.saveToken(
+      verifyEmailToken,
+      userId,
+      expires,
+      TokenTypes.VERIFY_EMAIL,
+    );
+    return verifyEmailToken;
+  }
 }

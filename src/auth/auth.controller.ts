@@ -6,6 +6,9 @@ import { TokenService } from 'src/token/token.service';
 import { IUserRequest } from 'types';
 import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, ForgotPasswordDto } from './dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { AccessTokenGuard } from './guards/accessToken.guard';
 import { RefreshTokenGuard } from './guards/refreshToken.guard';
 
 @Controller('auth')
@@ -15,12 +18,6 @@ export class AuthController {
     private tokenService: TokenService,
     private emailService: EmailService,
   ) {}
-
-  // @UseGuards(RefreshTokenGuard)
-  // @Get('me')
-  // me(@Req() req: Request) {
-  //   return req.user;
-  // }
 
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
@@ -88,24 +85,35 @@ export class AuthController {
     });
   }
   @Post('reset-password')
-  resetPassword() {
-    // await authService.resetPassword(req.query.token, req.body.password);
-    // res.status(httpStatus.NO_CONTENT).send();
-    return 'reset-password';
+  async resetPassword(@Body() dto: ResetPasswordDto, @Res() res: Response) {
+    await this.authService.resetPassword(dto);
+    res.status(HttpStatus.OK).send({
+      statusCode: 200,
+      message: 'تغییر پسورد با موفقیت انجام شد',
+    });
   }
 
+  @UseGuards(AccessTokenGuard)
   @Post('send-verification-email')
-  sendVerificationEmail() {
-    // const verifyEmailToken = await tokenService.generateVerifyEmailToken(req.user);
-    // await emailService.sendVerificationEmail(req.user.email, verifyEmailToken);
-    // res.status(httpStatus.NO_CONTENT).send();
-    return 'send-verification-email';
+  async sendVerificationEmail(@Req() req: IUserRequest, @Res() res: Response) {
+    const userId = req.user.sub;
+    const userEmail = req.user.info.email;
+    const verifyEmailToken = await this.tokenService.generateVerifyEmailToken(
+      userId,
+    );
+    await this.emailService.sendVerificationEmail(userEmail, verifyEmailToken);
+    res.status(HttpStatus.OK).send({
+      statusCode: 200,
+      message: 'ایمیل فعالسازی برای شما ارسال شد',
+    });
   }
 
   @Post('verify-email')
-  verifyEmail() {
-    // await authService.verifyEmail(req.query.token);
-    // res.status(httpStatus.NO_CONTENT).send();
-    return 'verify-email';
+  async verifyEmail(@Body() dto: VerifyEmailDto, @Res() res: Response) {
+    await this.authService.verifyEmail(dto);
+    res.status(HttpStatus.OK).send({
+      statusCode: 200,
+      message: 'ایمیل شما با موفقیت فعال شد',
+    });
   }
 }

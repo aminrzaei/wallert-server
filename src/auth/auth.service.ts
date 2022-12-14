@@ -1,10 +1,19 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { TokenService } from 'src/token/token.service';
 import { UserService } from 'src/user/user.service';
 import { TokenTypes } from 'types';
 import { RegisterDto } from './dto';
 import { LoginDto } from './dto/login.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @Injectable()
 export class AuthService {
@@ -69,31 +78,41 @@ export class AuthService {
     return { user, tokens };
   }
 
-  // resetPassword = async (resetPasswordToken, newPassword) => {
-  //   try {
-  //     const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
-  //     const user = await userService.getUserById(resetPasswordTokenDoc.user);
-  //     if (!user) {
-  //       throw new Error();
-  //     }
-  //     await userService.updateUserById(user.id, { password: newPassword });
-  //     await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
-  //   } catch (error) {
-  //     throw new ApiError(httpStatus.UNAUTHORIZED, 'تغییر رمز عبور انجام نشد');
-  //   }
-  // };
+  async resetPassword(dto: ResetPasswordDto) {
+    const { sub: userId } = await this.tokenService.verifyToken(dto.token);
+    const isTokenValid = await this.tokenService.validateToken(
+      dto.token,
+      TokenTypes.RESET_PASSWORD,
+      userId,
+    );
+    if (!isTokenValid) throw new UnauthorizedException('توکن فاقد اعتبار است');
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new NotFoundException('کاربر مورد نظر یافت نشد');
+    await this.userService.updateUserById(user.id, { password: dto.password });
+    await this.prisma.token.deleteMany({
+      where: {
+        userId: user.id,
+        type: TokenTypes.RESET_PASSWORD,
+      },
+    });
+  }
 
-  // verifyEmail = async (verifyEmailToken) => {
-  //   try {
-  //     const verifyEmailTokenDoc = await tokenService.verifyToken(verifyEmailToken, tokenTypes.VERIFY_EMAIL);
-  //     const user = await userService.getUserById(verifyEmailTokenDoc.user);
-  //     if (!user) {
-  //       throw new Error();
-  //     }
-  //     await Token.deleteMany({ user: user.id, type: tokenTypes.VERIFY_EMAIL });
-  //     await userService.updateUserById(user.id, { isEmailVerified: true });
-  //   } catch (error) {
-  //     throw new ApiError(httpStatus.UNAUTHORIZED, 'فعالسازی ایمیل انجام نشد');
-  //   }
-  // };
+  async verifyEmail({ token }: VerifyEmailDto) {
+    const { sub: userId } = await this.tokenService.verifyToken(token);
+    const isTokenValid = await this.tokenService.validateToken(
+      token,
+      TokenTypes.VERIFY_EMAIL,
+      userId,
+    );
+    if (!isTokenValid) throw new UnauthorizedException('توکن فاقد اعتبار است');
+    const user = await this.userService.getUserById(userId);
+    if (!user) throw new NotFoundException('کاربر مورد نظر یافت نشد');
+    await this.prisma.token.deleteMany({
+      where: {
+        userId,
+        type: TokenTypes.VERIFY_EMAIL,
+      },
+    });
+    await this.userService.updateUserById(userId, { isEmailVerified: true });
+  }
 }
