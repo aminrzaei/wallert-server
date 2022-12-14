@@ -72,6 +72,12 @@ export class TokenService {
       TokenTypes.REFRESH,
     );
 
+    await this.prisma.token.deleteMany({
+      where: {
+        userId,
+      },
+    });
+
     await this.saveToken(
       refreshToken,
       userId,
