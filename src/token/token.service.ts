@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as moment from 'moment';
@@ -104,13 +100,13 @@ export class TokenService {
         isBlacklisted: false,
       },
     });
-    const isTokenValid = !!tokenDoc;
-    return isTokenValid;
+    if (!tokenDoc) throw new UnauthorizedException('توکن فاقد اعتبار است');
+    return tokenDoc;
   }
 
-  async verifyToken(token: string) {
+  async verifyJwt(jwt: string) {
     return this.jwt
-      .verifyAsync(token, {
+      .verifyAsync(jwt, {
         secret: this.config.get('jwt.jwtSecret'),
       })
       .then((val) => {
@@ -123,9 +119,6 @@ export class TokenService {
 
   async generateResetPasswordToken(email: string) {
     const user = await this.userService.getUserByEmail(email);
-    if (!user) {
-      throw new NotFoundException('کاربری با این ایمیل یافت نشد');
-    }
     const expires = moment().add(
       this.config.get('jwt.resetExpirationMinutes'),
       'minutes',

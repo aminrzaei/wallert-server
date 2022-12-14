@@ -3,13 +3,17 @@ import { HttpStatus } from '@nestjs/common/enums';
 import { Response } from 'express';
 import { EmailService } from 'src/email/email.service';
 import { TokenService } from 'src/token/token.service';
-import { IUserRequest } from 'types';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, ForgotPasswordDto } from './dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { VerifyEmailDto } from './dto/verify-email.dto';
 import { AccessTokenGuard } from './guards/accessToken.guard';
 import { RefreshTokenGuard } from './guards/refreshToken.guard';
+import {
+  RegisterDto,
+  LoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  VerifyEmailDto,
+} from './dto';
+import { IUserRequest } from 'types';
 
 @Controller('auth')
 export class AuthController {
@@ -51,17 +55,21 @@ export class AuthController {
   @Post('logout')
   logout(@Req() req: IUserRequest, @Res({ passthrough: true }) res: Response) {
     res.clearCookie('wallert_refresh_token');
-    const refreshToken = req.user.refreshToken;
-    return this.authService.logout(refreshToken);
+    const refreshTokenId = req.user.refreshToken.id;
+    return this.authService.logout(refreshTokenId);
   }
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-tokens')
   async refreshToken(@Req() req: IUserRequest, @Res() res: Response) {
-    const doUseSecureCoockie = process.env.NODE_ENV === 'production';
-    const refreshToken = req.user.refreshToken;
-    const { user, tokens } = await this.authService.refreshAuth(refreshToken);
+    const refreshTokenId = req.user.refreshToken.id;
+    const userId = req.user.sub;
+    const { user, tokens } = await this.authService.refreshAuth(
+      refreshTokenId,
+      userId,
+    );
     const { access, refresh } = tokens;
+    const doUseSecureCoockie = process.env.NODE_ENV === 'production';
     res.cookie('wallert_refresh_token', refresh.token, {
       httpOnly: true,
       secure: doUseSecureCoockie,
@@ -84,6 +92,7 @@ export class AuthController {
       message: 'ایمیل تغییر پسورد برای شما ارسال شد',
     });
   }
+
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto, @Res() res: Response) {
     await this.authService.resetPassword(dto);

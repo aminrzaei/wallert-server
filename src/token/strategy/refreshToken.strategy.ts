@@ -29,12 +29,12 @@ export class RefreshTokenStrategy extends PassportStrategy(
   async validate(req: Request, payload: JwtPayload) {
     if (payload.type !== TokenTypes.REFRESH) return null;
     const refreshToken = req.cookies.wallert_refresh_token;
-    const isRefreshTokenValid = await this.tokenService.validateToken(
+    const tokenDoc = await this.tokenService.validateToken(
       refreshToken,
       TokenTypes.REFRESH,
       payload.sub,
     );
-    if (!isRefreshTokenValid) return null;
-    return { ...payload, refreshToken };
+    if (!tokenDoc) return null;
+    return { ...payload, refreshToken: tokenDoc };
   }
 }
