@@ -8,16 +8,14 @@ datasource db {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  email           String    @unique
-  name            String
-  password        String
-  phone           String    @unique
-  isEmailVerified Boolean   @default(false)
-  tracks          Track[]
-  contacts        Contact[]
-  tokens          Token[]
-  orders          Order[]
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  name     String
+  password String
+  tracks   Track[]
+  contacts Contact[]
+  tokens   Token[]
+  orders   Order[]
 }
 
 model Track {
@@ -35,7 +33,7 @@ model Contact {
   id          Int     @id @default(autoincrement())
   type        String
   isActivated Boolean @default(false)
-  address     String
+  address     String  @unique
   userId      Int
   user        User    @relation(fields: [userId], references: [id])
 }
@@ -43,7 +41,7 @@ model Contact {
 model Token {
   id            Int     @id @default(autoincrement())
   type          String
-  token         String
+  token         String  @db.VarChar(300)
   expires       String
   isBlacklisted Boolean @default(false)
   userId        Int

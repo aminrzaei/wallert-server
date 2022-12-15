@@ -33,11 +33,11 @@ export class EmailService {
       await this.mailerService.sendMail({
         to,
         from: 'wallert@info.ir',
-        subject: 'فعالسازی ایمیل حساب کاربری',
+        subject: 'فعالسازی حساب کاربری',
         template: 'verify-email',
         context: {
           // Data to be sent to template engine.
-          url: `${this.FRONTEND_URL}/verify-email?token=${token}`,
+          url: `${this.FRONTEND_URL}/register?token=${token}`,
         },
       });
     } catch (error) {

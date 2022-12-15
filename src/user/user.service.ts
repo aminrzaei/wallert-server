@@ -5,19 +5,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { RegisterDto } from 'src/auth/dto';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { User } from '@prisma/client';
+import { CreateUserDate } from 'types';
 
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(registerDto: RegisterDto) {
+  async createUser(createUserData: CreateUserDate) {
     try {
-      const hashedPassword = await argon.hash(registerDto.password);
+      const hashedPassword = await argon.hash(createUserData.password);
       const user = await this.prisma.user.create({
-        data: { ...registerDto, password: hashedPassword },
+        data: { ...createUserData, password: hashedPassword },
       });
       return user;
     } catch (err) {

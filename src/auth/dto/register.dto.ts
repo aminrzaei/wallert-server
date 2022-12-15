@@ -1,12 +1,12 @@
-import {
-  IsEmail,
-  MinLength,
-  MaxLength,
-  Matches,
-  IsPhoneNumber,
-} from 'class-validator';
+import { MinLength, MaxLength, Matches, IsJWT } from 'class-validator';
 
 export class RegisterDto {
+  // Token
+  @IsJWT({
+    message: 'توکن استفاده شده نامعتبر است',
+  })
+  token: string;
+
   // Name
   @MinLength(3, {
     message: 'حداقل طول نام بایستی 3 کاراکتر باشد.',
@@ -15,18 +15,6 @@ export class RegisterDto {
     message: 'حداکثر طول نام بایستی 50 کاراکتر باشد.',
   })
   name: string;
-
-  // Email
-  @IsEmail(undefined, {
-    message: 'فرمت ایمیل نامعتبر است.',
-  })
-  email: string;
-
-  // Phone
-  @IsPhoneNumber('IR', {
-    message: 'شماره تلفن معتبر نیست',
-  })
-  phone: string;
 
   // Password
   @Matches(

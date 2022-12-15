@@ -15,8 +15,9 @@ export class TokenService {
     private userService: UserService,
   ) {}
 
-  generateToken(
+  async generateToken(
     userId: number,
+    userEmail: string,
     expires: moment.Moment,
     type: TokenTypes,
     secret: string = this.config.get('jwt.jwtSecret'),
@@ -25,9 +26,10 @@ export class TokenService {
       sub: userId,
       iat: moment().unix(),
       exp: expires.unix(),
+      email: userEmail,
       type,
     };
-    return this.jwt.sign(payload, {
+    return this.jwt.signAsync(payload, {
       secret,
     });
   }
@@ -51,14 +53,31 @@ export class TokenService {
     return tokenDoc;
   }
 
-  async generateAuthTokens(userId: number) {
+  async deleteTokenById(id: number) {
+    await this.prisma.token.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  async deleteAllUserTokensByType(userId: number, type: TokenTypes) {
+    await this.prisma.token.deleteMany({
+      where: {
+        userId,
+        type,
+      },
+    });
+  }
+
+  async generateAuthTokens(userId: number, userEmail: string) {
     const accessTokenExpires = moment().add(
       this.config.get('jwt.accessExpirationMinutes'),
       'minutes',
     );
-
-    const accessToken = this.generateToken(
+    const accessToken = await this.generateToken(
       userId,
+      userEmail,
       accessTokenExpires,
       TokenTypes.ACCESS,
     );
@@ -66,25 +85,19 @@ export class TokenService {
       this.config.get('jwt.refreshExpirationDays'),
       'days',
     );
-    const refreshToken = this.generateToken(
+    const refreshToken = await this.generateToken(
       userId,
+      userEmail,
       refreshTokenExpires,
       TokenTypes.REFRESH,
     );
-
-    await this.prisma.token.deleteMany({
-      where: {
-        userId,
-      },
-    });
-
+    await this.deleteAllUserTokensByType(userId, TokenTypes.REFRESH);
     await this.saveToken(
       refreshToken,
       userId,
       refreshTokenExpires,
       TokenTypes.REFRESH,
     );
-
     return {
       access: {
         token: accessToken,
@@ -110,12 +123,14 @@ export class TokenService {
     return tokenDoc;
   }
 
-  async verifyJwt(jwt: string) {
-    return this.jwt
+  async verifyJwt(jwt: string, type: TokenTypes) {
+    return await this.jwt
       .verifyAsync(jwt, {
         secret: this.config.get('jwt.jwtSecret'),
       })
       .then((val) => {
+        if (val.type !== type)
+          throw new UnauthorizedException('توکن نامعتبر است است');
         return val;
       })
       .catch(() => {
@@ -129,8 +144,10 @@ export class TokenService {
       this.config.get('jwt.resetExpirationMinutes'),
       'minutes',
     );
-    const resetPasswordToken = this.generateToken(
+    await this.deleteAllUserTokensByType(user.id, TokenTypes.RESET_PASSWORD);
+    const resetPasswordToken = await this.generateToken(
       user.id,
+      user.email,
       expires,
       TokenTypes.RESET_PASSWORD,
     );
@@ -143,19 +160,14 @@ export class TokenService {
     return resetPasswordToken;
   }
 
-  async generateVerifyEmailToken(userId: number) {
+  async generateVerifyEmailToken(email: string) {
     const expires = moment().add(
       this.config.get('jwt.verifyEmailExpirationMinutes'),
       'minutes',
     );
     const verifyEmailToken = this.generateToken(
-      userId,
-      expires,
-      TokenTypes.VERIFY_EMAIL,
-    );
-    await this.saveToken(
-      verifyEmailToken,
-      userId,
+      -1,
+      email,
       expires,
       TokenTypes.VERIFY_EMAIL,
     );

@@ -4,14 +4,13 @@ import { Response } from 'express';
 import { EmailService } from 'src/email/email.service';
 import { TokenService } from 'src/token/token.service';
 import { AuthService } from './auth.service';
-import { AccessTokenGuard } from './guards/accessToken.guard';
 import { RefreshTokenGuard } from './guards/refreshToken.guard';
 import {
   RegisterDto,
   LoginDto,
   ForgotPasswordDto,
   ResetPasswordDto,
-  VerifyEmailDto,
+  SendVerificationEmailDto,
 } from './dto';
 import { IUserRequest } from 'types';
 
@@ -53,21 +52,24 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Post('logout')
-  logout(@Req() req: IUserRequest, @Res({ passthrough: true }) res: Response) {
-    res.clearCookie('wallert_refresh_token');
+  async logout(
+    @Req() req: IUserRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const refreshTokenId = req.user.refreshToken.id;
-    return this.authService.logout(refreshTokenId);
+    await this.authService.logout(refreshTokenId);
+    res.clearCookie('wallert_refresh_token');
+    res.status(HttpStatus.OK).send({
+      statusCode: 200,
+      message: 'از حساب کاربری خود خارج شدید',
+    });
   }
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-tokens')
   async refreshToken(@Req() req: IUserRequest, @Res() res: Response) {
-    const refreshTokenId = req.user.refreshToken.id;
     const userId = req.user.sub;
-    const { user, tokens } = await this.authService.refreshAuth(
-      refreshTokenId,
-      userId,
-    );
+    const { user, tokens } = await this.authService.refreshAuth(userId);
     const { access, refresh } = tokens;
     const doUseSecureCoockie = process.env.NODE_ENV === 'production';
     res.cookie('wallert_refresh_token', refresh.token, {
@@ -102,27 +104,19 @@ export class AuthController {
     });
   }
 
-  @UseGuards(AccessTokenGuard)
   @Post('send-verification-email')
-  async sendVerificationEmail(@Req() req: IUserRequest, @Res() res: Response) {
-    const userId = req.user.sub;
-    const userEmail = req.user.info.email;
+  async sendVerificationEmail(
+    @Body() dto: SendVerificationEmailDto,
+    @Res() res: Response,
+  ) {
     const verifyEmailToken = await this.tokenService.generateVerifyEmailToken(
-      userId,
+      dto.email,
     );
-    await this.emailService.sendVerificationEmail(userEmail, verifyEmailToken);
+    await this.emailService.sendVerificationEmail(dto.email, verifyEmailToken);
     res.status(HttpStatus.OK).send({
       statusCode: 200,
-      message: 'ایمیل فعالسازی برای شما ارسال شد',
-    });
-  }
-
-  @Post('verify-email')
-  async verifyEmail(@Body() dto: VerifyEmailDto, @Res() res: Response) {
-    await this.authService.verifyEmail(dto);
-    res.status(HttpStatus.OK).send({
-      statusCode: 200,
-      message: 'ایمیل شما با موفقیت فعال شد',
+      message:
+        'ایمیل فعالسازی برای شما ارسال شد لطفا ایمیل خود را بررسی نمایید',
     });
   }
 }

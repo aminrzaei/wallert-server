@@ -17,3 +17,9 @@ export enum TokenTypes {
 export interface IUserRequest extends Request {
   user: any;
 }
+
+export type CreateUserDate = {
+  name: string;
+  password: string;
+  email: string;
+};
