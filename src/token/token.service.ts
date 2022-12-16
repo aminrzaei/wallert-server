@@ -15,7 +15,7 @@ export class TokenService {
     private userService: UserService,
   ) {}
 
-  async generateToken(
+  generateToken(
     userId: number,
     userEmail: string,
     expires: moment.Moment,
@@ -34,14 +34,14 @@ export class TokenService {
     });
   }
 
-  async saveToken(
+  saveToken(
     token: string,
     userId: number,
     expires: moment.Moment,
     type: TokenTypes,
     isBlacklisted = false,
   ) {
-    const tokenDoc = this.prisma.token.create({
+    return this.prisma.token.create({
       data: {
         token,
         userId,
@@ -50,19 +50,18 @@ export class TokenService {
         isBlacklisted,
       },
     });
-    return tokenDoc;
   }
 
-  async deleteTokenById(id: number) {
-    await this.prisma.token.delete({
+  deleteTokenById(id: number) {
+    return this.prisma.token.delete({
       where: {
         id,
       },
     });
   }
 
-  async deleteAllUserTokensByType(userId: number, type: TokenTypes) {
-    await this.prisma.token.deleteMany({
+  deleteAllUserTokensByType(userId: number, type: TokenTypes) {
+    return this.prisma.token.deleteMany({
       where: {
         userId,
         type,

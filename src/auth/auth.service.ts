@@ -45,8 +45,8 @@ export class AuthService {
     return user;
   }
 
-  async logout(refreshTokenId: number) {
-    this.tokenService.deleteTokenById(refreshTokenId);
+  logout(refreshTokenId: number) {
+    return this.tokenService.deleteTokenById(refreshTokenId);
   }
 
   async refreshAuth(userId: number) {
