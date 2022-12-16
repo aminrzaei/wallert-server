@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Res, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  UseGuards,
+  Req,
+  Get,
+} from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common/enums';
 import { Response } from 'express';
 import { EmailService } from 'src/email/email.service';
@@ -13,6 +21,7 @@ import {
   SendVerificationEmailDto,
 } from './dto';
 import { IUserRequest } from 'types';
+import { AccessTokenGuard } from './guards/accessToken.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -118,5 +127,11 @@ export class AuthController {
       message:
         'ایمیل فعالسازی برای شما ارسال شد لطفا ایمیل خود را بررسی نمایید',
     });
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @Get('me')
+  me(@Req() req: IUserRequest, @Res() res: Response) {
+    res.send(req.user);
   }
 }

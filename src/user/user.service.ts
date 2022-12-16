@@ -16,7 +16,7 @@ export class UserService {
   async createUser(createUserData: CreateUserDate) {
     try {
       const hashedPassword = await argon.hash(createUserData.password);
-      const user = await this.prisma.user.create({
+      const user = this.prisma.user.create({
         data: { ...createUserData, password: hashedPassword },
       });
       return user;

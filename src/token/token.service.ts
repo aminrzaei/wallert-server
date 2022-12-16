@@ -41,7 +41,7 @@ export class TokenService {
     type: TokenTypes,
     isBlacklisted = false,
   ) {
-    const tokenDoc = await this.prisma.token.create({
+    const tokenDoc = this.prisma.token.create({
       data: {
         token,
         userId,
@@ -124,18 +124,16 @@ export class TokenService {
   }
 
   async verifyJwt(jwt: string, type: TokenTypes) {
-    return await this.jwt
-      .verifyAsync(jwt, {
+    try {
+      const val = await this.jwt.verifyAsync(jwt, {
         secret: this.config.get('jwt.jwtSecret'),
-      })
-      .then((val) => {
-        if (val.type !== type)
-          throw new UnauthorizedException('توکن نامعتبر است است');
-        return val;
-      })
-      .catch(() => {
-        throw new UnauthorizedException('توکن منقضی شده است');
       });
+      if (val.type !== type)
+        throw new UnauthorizedException('توکن نامعتبر است است');
+      return val;
+    } catch {
+      throw new UnauthorizedException('توکن منقضی شده است');
+    }
   }
 
   async generateResetPasswordToken(email: string) {
@@ -165,7 +163,7 @@ export class TokenService {
       this.config.get('jwt.verifyEmailExpirationMinutes'),
       'minutes',
     );
-    const verifyEmailToken = this.generateToken(
+    const verifyEmailToken = await this.generateToken(
       -1,
       email,
       expires,

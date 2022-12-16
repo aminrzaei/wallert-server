@@ -46,7 +46,7 @@ export class AuthService {
   }
 
   async logout(refreshTokenId: number) {
-    await this.tokenService.deleteTokenById(refreshTokenId);
+    this.tokenService.deleteTokenById(refreshTokenId);
   }
 
   async refreshAuth(userId: number) {
@@ -64,11 +64,12 @@ export class AuthService {
       dto.token,
       TokenTypes.RESET_PASSWORD,
     );
-    await this.tokenService.validateToken(
+    const resetToken = await this.tokenService.validateToken(
       dto.token,
       TokenTypes.RESET_PASSWORD,
       userId,
     );
+    await this.tokenService.deleteTokenById(resetToken.id);
     await this.userService.updateUserById(userId, { password: dto.password });
   }
 }

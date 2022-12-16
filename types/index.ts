@@ -5,6 +5,7 @@ export type JwtPayload = {
   iat: number;
   exp: number;
   type: TokenTypes;
+  email: string;
 };
 
 export enum TokenTypes {
