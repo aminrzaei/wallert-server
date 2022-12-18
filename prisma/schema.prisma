@@ -18,13 +18,13 @@ model User {
 }
 
 model Track {
-  id           Int      @id @default(autoincrement())
-  interval     Int
-  city         String
-  query        String
-  lastPostTime DateTime
-  userId       Int
-  user         User     @relation(fields: [userId], references: [id])
+  id            Int      @id @default(autoincrement())
+  interval      Int
+  query         String
+  lastPostToken String
+  lastCheckTime DateTime
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
 }
 
 model Token {
