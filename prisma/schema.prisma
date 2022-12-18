@@ -8,12 +8,11 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  email    String    @unique
+  id       Int     @id @default(autoincrement())
+  email    String  @unique
   name     String
   password String
   tracks   Track[]
-  contacts Contact[]
   tokens   Token[]
   orders   Order[]
 }
@@ -24,18 +23,8 @@ model Track {
   city         String
   query        String
   lastPostTime DateTime
-  contactType  String
   userId       Int
   user         User     @relation(fields: [userId], references: [id])
-}
-
-model Contact {
-  id          Int     @id @default(autoincrement())
-  type        String
-  isActivated Boolean @default(false)
-  address     String  @unique
-  userId      Int
-  user        User    @relation(fields: [userId], references: [id])
 }
 
 model Token {
