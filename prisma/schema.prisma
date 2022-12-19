@@ -24,6 +24,7 @@ model Track {
   lastPostToken String
   lastCheckTime DateTime
   userId        Int
+  isActive      Boolean  @default(true)
   user          User     @relation(fields: [userId], references: [id])
 }
 

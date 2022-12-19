@@ -5,11 +5,11 @@ import { TrackModule } from './track/track.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { EmailModule } from './email/email.module';
 import { TokenModule } from './token/token.module';
-import configuration from 'config/configuration';
+import configuration from 'src/common/config/configuration';
 import { ConfigModule } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
-
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,6 +37,7 @@ import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
         },
       },
     }),
+    ScheduleModule.forRoot(),
     AuthModule,
     UserModule,
     TrackModule,
