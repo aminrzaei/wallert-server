@@ -44,4 +44,22 @@ export class EmailService {
       throw new ServiceUnavailableException(error);
     }
   }
+
+  async sendTrackEmail(to: string, posts: any, trackTitle: string) {
+    try {
+      await this.mailerService.sendMail({
+        to,
+        from: 'wallert@info.ir',
+        subject: `آگهی های جدید: ${trackTitle}`,
+        template: 'track',
+        context: {
+          // Data to be sent to template engine.
+          trackTitle,
+          posts,
+        },
+      });
+    } catch (error) {
+      throw new ServiceUnavailableException(error);
+    }
+  }
 }

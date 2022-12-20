@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Track` ALTER COLUMN `title` DROP DEFAULT;

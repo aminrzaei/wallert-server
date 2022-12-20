@@ -15,7 +15,17 @@ export enum TokenTypes {
   VERIFY_EMAIL = 'verifyEmail',
 }
 
-export interface IUserRequest extends Request {
+export enum ContactType {
+  EMAIL = 'email',
+  TELEGRAM = 'telegram',
+}
+
+export type RequestUser = {
+  id: number;
+  email: string;
+  name: string;
+};
+export interface ICustomRequest extends Request {
   user: any;
 }
 

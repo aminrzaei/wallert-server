@@ -18,14 +18,17 @@ model User {
 }
 
 model Track {
-  id            Int      @id @default(autoincrement())
-  interval      Int
-  query         String
-  lastPostToken String
-  lastCheckTime DateTime
-  userId        Int
-  isActive      Boolean  @default(true)
-  user          User     @relation(fields: [userId], references: [id])
+  id             Int     @id @default(autoincrement())
+  title          String
+  interval       Int
+  query          String
+  contactType    String
+  contactAddress String
+  lastPostToken  String
+  lastCheckTime  String
+  userId         Int
+  isActive       Boolean @default(true)
+  user           User    @relation(fields: [userId], references: [id])
 }
 
 model Token {
@@ -39,12 +42,12 @@ model Token {
 }
 
 model Order {
-  id              Int      @id @default(autoincrement())
-  date            DateTime
+  id              Int    @id @default(autoincrement())
+  date            String
   price           Int
   description     String
   transactionCode String
   pid             String
   userId          Int
-  user            User     @relation(fields: [userId], references: [id])
+  user            User   @relation(fields: [userId], references: [id])
 }

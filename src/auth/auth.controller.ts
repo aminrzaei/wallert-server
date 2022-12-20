@@ -20,7 +20,7 @@ import {
   ResetPasswordDto,
   SendVerificationEmailDto,
 } from './dto';
-import { IUserRequest } from 'types';
+import { ICustomRequest } from 'types';
 import { AccessTokenGuard } from './guards/accessToken.guard';
 
 @Controller('auth')
@@ -62,7 +62,7 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @Post('logout')
   async logout(
-    @Req() req: IUserRequest,
+    @Req() req: ICustomRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshTokenId = req.user.refreshToken.id;
@@ -76,7 +76,7 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-tokens')
-  async refreshToken(@Req() req: IUserRequest, @Res() res: Response) {
+  async refreshToken(@Req() req: ICustomRequest, @Res() res: Response) {
     const userId = req.user.sub;
     const { user, tokens } = await this.authService.refreshAuth(userId);
     const { access, refresh } = tokens;
@@ -131,7 +131,7 @@ export class AuthController {
 
   @UseGuards(AccessTokenGuard)
   @Get('me')
-  me(@Req() req: IUserRequest, @Res() res: Response) {
+  me(@Req() req: ICustomRequest, @Res() res: Response) {
     res.send(req.user);
   }
 }

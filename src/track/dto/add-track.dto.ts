@@ -1,7 +1,23 @@
 import { Transform } from 'class-transformer';
-import { IsIn, IsInt, IsUrl, Matches } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsUrl,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class AddTrackDto {
+  //Title
+  @MinLength(2, {
+    message: 'حداقل طول عنوان پیگیری 2 حرف میباشد',
+  })
+  @MaxLength(250, {
+    message: 'حداکثر طول عنوان پیگیری 250 حرف میباشد',
+  })
+  title: string;
+
   // Interval
   @Transform(({ value }) => Number(value))
   @IsInt()

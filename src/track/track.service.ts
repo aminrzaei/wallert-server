@@ -1,51 +1,91 @@
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { Track } from '@prisma/client';
 import * as moment from 'moment';
+import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ContactType, RequestUser } from 'types';
 import { AddTrackDto } from './dto';
 
 @Injectable()
 export class TrackService {
-  constructor(private prisma: PrismaService) {}
-  async createTrack(dto: AddTrackDto, userId: number) {
-    const { interval, query } = dto;
-    const now = moment().format();
+  constructor(
+    private prisma: PrismaService,
+    private emailService: EmailService,
+  ) {}
+  async createTrack(dto: AddTrackDto, user: RequestUser) {
+    const { title, interval, query } = dto;
     const { postToken: lastPostToken } = await this.getLastpost(query);
-    console.log(lastPostToken);
+    String;
+    String;
     return this.prisma.track.create({
       data: {
+        title,
         interval,
         query,
-        lastCheckTime: now,
+        contactType: ContactType.EMAIL,
+        contactAddress: user.email,
+        lastCheckTime: moment().format(),
         lastPostToken,
-        userId,
+        userId: user.id,
       },
     });
   }
+
   async getLastpost(query: string) {
     const posts = await this.getPosts(query);
     const lastPost = posts[0];
     return { postToken: lastPost.data.token };
   }
 
-  // @Cron(CronExpression.EVERY_MINUTE)
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_MINUTE)
+  // @Cron(CronExpression.EVERY_10_SECONDS)
   async tracking() {
     const tracks = await this.prisma.track.findMany();
     const tracksLen = tracks.length;
     let i = 0;
     while (i < tracksLen) {
       const track = tracks[i];
-      const { isActive, lastCheckTime, interval, query, lastPostToken } = track;
+      const {
+        id,
+        title,
+        isActive,
+        contactType,
+        contactAddress,
+        lastCheckTime,
+        interval,
+        query,
+        lastPostToken,
+      } = track;
       i++;
       if (!this.isVaildToTrack(isActive, lastCheckTime, interval)) continue;
       const posts = await this.getPosts(query);
       const latestPosts = this.getLatestPosts(posts, lastPostToken);
-      console.log(latestPosts);
-      // set last time and last token
+      if (latestPosts.length !== 0) {
+        const updateTrackData = {
+          lastCheckTime: moment().format(),
+          lastPostToken: latestPosts[0].token as string,
+        };
+        await this.updateTrack(id, updateTrackData);
+        if (contactType === ContactType.EMAIL) {
+          await this.emailService.sendTrackEmail(
+            contactAddress,
+            latestPosts,
+            title,
+          );
+        }
+      }
     }
   }
 
+  updateTrack(trackId: number, updateData: Partial<Track>) {
+    return this.prisma.track.update({
+      where: {
+        id: trackId,
+      },
+      data: updateData,
+    });
+  }
   async getPosts(query: string) {
     const API_URL = 'https://api.divar.ir/v8/web-search/';
     const WEB_URL = 'https://divar.ir/s/';
@@ -57,7 +97,7 @@ export class TrackService {
 
   isVaildToTrack(
     isTrackActive: boolean,
-    trackLastCheckTime: Date,
+    trackLastCheckTime: string,
     trackInterval: number,
   ): boolean {
     if (!isTrackActive) return false;
