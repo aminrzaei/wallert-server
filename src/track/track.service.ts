@@ -121,6 +121,7 @@ export class TrackService {
   }
 
   extractPostsData(posts) {
+    const POST_URl = 'https://divar.ir/v/';
     return posts.map((post) => {
       const postData = post.data;
       return {
@@ -131,6 +132,7 @@ export class TrackService {
         city: postData.action.payload.web_info.city_persian,
         category: postData.action.payload.web_info.category_slug_persian,
         token: postData.token,
+        link: POST_URl + postData.token,
       };
     });
   }

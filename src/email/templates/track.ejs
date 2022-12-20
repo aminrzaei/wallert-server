@@ -1,47 +1,146 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
-  xmlns:o="urn:schemas-microsoft-com:office:office">
+<html
+  lang="fa"
+  dir="rtl"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:v="urn:schemas-microsoft-com:vml"
+  xmlns:o="urn:schemas-microsoft-com:office:office"
+>
+  <head>
+    <title>آگهی های - <%= locals.trackTitle %></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        -webkit-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
+        text-align: center;
+        direction: rtl;
+        background-color: #efefef;
+        font-family: IRANYekan, IranSans, Tahoma, sans-serif;
+      }
+    </style>
+  </head>
 
-<head>
-  <title>"<%= locals.trackTitle %>" پیگیری</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style type="text/css">
-    body {
-      margin: 0;
-      padding: 0;
-      -webkit-text-size-adjust: 100%;
-      -ms-text-size-adjust: 100%;
-      text-align: center;
-    }
-  </style>
-</head>
-
-<body>
-  <div style="direction: rtl; margin-top: 20px">
-    <ul>
-      <% for(let i=0; i<locals.posts.length; i++) {%>
-        <li>
-          <p>
-            <%= locals.posts[i].title %>
-          </p>
-          <img src="<%= locals.posts[i].image %>" />
-          <p>
-            <%= locals.posts[i].top_description %>
-          </p>
-          <p>
-            <%= locals.posts[i].middle_description %>
-          </p>
-          <p>
-            <%= locals.posts[i].city %>
-          </p>
-          <p>
-            <%= locals.posts[i].category %>
-          </p>
-        </li>
-        <% } %>
-    </ul>
-  </div>
-</body>
-
+  <body>
+    <table
+      align="center"
+      border="0"
+      cellpadding="0"
+      cellspacing="0"
+      role="presentation"
+      style="margin: 0 auto"
+      width="100%"
+    >
+      <tbody>
+        <tr>
+          <td style="padding: 40px 0 10px 0; text-align: center">
+            <h1>آگهی های - <%= locals.trackTitle %></h1>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <table
+              style="margin: 0 auto"
+              border="0"
+              cellpadding="0"
+              cellspacing="0"
+              role="presentation"
+              width="70%"
+            >
+              <tbody>
+                <tr>
+                  <td
+                    style="
+                      padding: 10px 30px;
+                      font-family: IRANYekan, IranSans, Tahoma, sans-serif;
+                      font-size: 15px;
+                      line-height: 25px;
+                      color: #555555;
+                    "
+                  >
+                    <ul style="list-style: none; margin: 0">
+                      <% for(let i=0; i<locals.posts.length; i++) {%>
+                      <li
+                        style="
+                          background-color: #f9f9f9;
+                          border-radius: 5px;
+                          border: 1px solid rgb(0, 0, 0);
+                          padding: 10px 15px;
+                          margin-bottom: 5px;
+                        "
+                      >
+                        <a
+                          href="<%= locals.posts[i].link %>"
+                          target="_blank"
+                          rel="noopener"
+                          style="text-decoration: none"
+                        >
+                          <div
+                            style="
+                              color: #000000;
+                              display: flex;
+                              justify-content: space-between;
+                              align-items: center;
+                            "
+                          >
+                            <div
+                              style="
+                                padding-right: 5px;
+                                font-size: 14px;
+                                text-align: right;
+                                width: 100%;
+                              "
+                            >
+                              <strong
+                                style="
+                                  display: block;
+                                  font-size: 18px;
+                                  margin: 7px 5px 10px;
+                                "
+                                ><%= locals.posts[i].title %></strong
+                              >
+                              <p style="margin: 2px"><%= locals.posts[i].middle_description %></p>
+                              <p style="margin: 2px"><%= locals.posts[i].city %></p>
+                              <p style="margin: 2px"> <%= locals.posts[i].category %></p>
+                              <p style="margin: 2px"><%= locals.posts[i].top_description %></p>
+                            </div>
+                            <img
+                              style="
+                                float: right;
+                                border-radius: 5px;
+                                height: 140px;
+                              "
+                              alt="<%= locals.posts[i].title %>"
+                              aria-label="<%= locals.posts[i].title %>"
+                              <% if(locals.posts[i].image){ %>
+                                src="<%=locals.posts[i].image %>"
+                              <% } else{ %>  
+                                src="https://via.placeholder.com/150/?text=No%20image"
+                             <% } %>
+                              loading="lazy"
+                            />
+                          </div>
+                        </a>
+                      </li>
+                      <% } %>
+                    </ul>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding: 20px; text-align: center; margin: auto 0">
+            <p style="font-size: 16px; color: #555555">
+              برای لغو این پیگیری از پنل کاربری اغدام نمایید
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
 </html>
