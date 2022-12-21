@@ -54,7 +54,7 @@ export class UserService {
         id,
       },
     });
-    if (!user) throw new NotFoundException('کاربری با این مشخصات یافت نشد');
+    if (!user) throw new NotFoundException('کاربری با این شناسه یافت نشد');
     return user;
   }
 

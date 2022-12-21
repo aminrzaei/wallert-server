@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Track } from '@prisma/client';
 import * as moment from 'moment';
@@ -39,7 +39,6 @@ export class TrackService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
-  // @Cron(CronExpression.EVERY_10_SECONDS)
   async tracking() {
     const tracks = await this.prisma.track.findMany();
     const tracksLen = tracks.length;
@@ -78,7 +77,7 @@ export class TrackService {
     }
   }
 
-  updateTrack(trackId: number, updateData: Partial<Track>) {
+  updateTrack(trackId: number, updateData: Partial<Track>): Promise<Track> {
     return this.prisma.track.update({
       where: {
         id: trackId,
@@ -86,6 +85,26 @@ export class TrackService {
       data: updateData,
     });
   }
+
+  deleteTrack(trackId: number): Promise<Track> {
+    return this.prisma.track.delete({
+      where: {
+        id: trackId,
+      },
+    });
+  }
+
+  async getTrackById(id: number, userId: number): Promise<Track> | never {
+    const track = await this.prisma.track.findFirst({
+      where: {
+        id,
+        userId,
+      },
+    });
+    if (!track) throw new NotFoundException('پیگیری ای با این شسناسه یافت نشد');
+    return track;
+  }
+
   async getPosts(query: string) {
     const API_URL = 'https://api.divar.ir/v8/web-search/';
     const WEB_URL = 'https://divar.ir/s/';
