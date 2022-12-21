@@ -1,10 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Token } from '@prisma/client';
 import * as moment from 'moment';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
-import { TokenTypes } from 'types';
+import { JwtPayload, TokenTypes } from 'types';
 
 @Injectable()
 export class TokenService {
@@ -21,7 +22,7 @@ export class TokenService {
     expires: moment.Moment,
     type: TokenTypes,
     secret: string = this.config.get('jwt.jwtSecret'),
-  ) {
+  ): Promise<string> {
     const payload = {
       sub: userId,
       iat: moment().unix(),
@@ -40,7 +41,7 @@ export class TokenService {
     expires: moment.Moment,
     type: TokenTypes,
     isBlacklisted = false,
-  ) {
+  ): Promise<Token> {
     return this.prisma.token.create({
       data: {
         token,
@@ -52,7 +53,7 @@ export class TokenService {
     });
   }
 
-  deleteTokenById(id: number) {
+  deleteTokenById(id: number): Promise<Token> {
     return this.prisma.token.delete({
       where: {
         id,
@@ -109,7 +110,11 @@ export class TokenService {
     };
   }
 
-  async validateToken(token: string, type: TokenTypes, userId: number) {
+  async validateToken(
+    token: string,
+    type: TokenTypes,
+    userId: number,
+  ): Promise<Token> {
     const tokenDoc = await this.prisma.token.findFirst({
       where: {
         type,
@@ -122,7 +127,7 @@ export class TokenService {
     return tokenDoc;
   }
 
-  async verifyJwt(jwt: string, type: TokenTypes) {
+  async verifyJwt(jwt: string, type: TokenTypes): Promise<JwtPayload> {
     try {
       const val = await this.jwt.verifyAsync(jwt, {
         secret: this.config.get('jwt.jwtSecret'),
@@ -135,7 +140,7 @@ export class TokenService {
     }
   }
 
-  async generateResetPasswordToken(email: string) {
+  async generateResetPasswordToken(email: string): Promise<string> {
     const user = await this.userService.getUserByEmail(email);
     const expires = moment().add(
       this.config.get('jwt.resetExpirationMinutes'),
@@ -157,7 +162,7 @@ export class TokenService {
     return resetPasswordToken;
   }
 
-  async generateVerifyEmailToken(email: string) {
+  async generateVerifyEmailToken(email: string): Promise<string> {
     const expires = moment().add(
       this.config.get('jwt.verifyEmailExpirationMinutes'),
       'minutes',

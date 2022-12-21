@@ -3,6 +3,7 @@ import { TokenService } from 'src/token/token.service';
 import { UserService } from 'src/user/user.service';
 import { RegisterDto, LoginDto, ResetPasswordDto } from './dto';
 import { CreateUserDate, TokenTypes } from 'types';
+import { Token, User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -38,14 +39,14 @@ export class AuthService {
     return { user, tokens };
   }
 
-  async loginUserWithEmailAndPassword(dto: LoginDto) {
+  async loginUserWithEmailAndPassword(dto: LoginDto): Promise<User> {
     const user = await this.userService.getUserByEmail(dto.email);
     await this.userService.verifyPassword(user.password, dto.password);
     delete user.password;
     return user;
   }
 
-  logout(refreshTokenId: number) {
+  logout(refreshTokenId: number): Promise<Token> {
     return this.tokenService.deleteTokenById(refreshTokenId);
   }
 
@@ -59,7 +60,7 @@ export class AuthService {
     return { user, tokens };
   }
 
-  async resetPassword(dto: ResetPasswordDto) {
+  async resetPassword(dto: ResetPasswordDto): Promise<void> {
     const { sub: userId } = await this.tokenService.verifyJwt(
       dto.token,
       TokenTypes.RESET_PASSWORD,

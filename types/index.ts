@@ -34,3 +34,14 @@ export type CreateUserDate = {
   password: string;
   email: string;
 };
+
+export type Post = {
+  image: string;
+  title: string;
+  top_description: string;
+  middle_description: string;
+  city: string;
+  category: string;
+  token: string;
+  link: string;
+};

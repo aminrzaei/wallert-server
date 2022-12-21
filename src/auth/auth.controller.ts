@@ -31,6 +31,11 @@ export class AuthController {
     private emailService: EmailService,
   ) {}
 
+  /**
+   * Create new user
+   * @param dto
+   * @param res
+   */
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
     const { user, tokens } = await this.authService.register(dto);
@@ -45,6 +50,11 @@ export class AuthController {
     res.status(HttpStatus.OK).send({ user, access_token: access });
   }
 
+  /**
+   * Login user
+   * @param dto
+   * @param res
+   */
   @Post('login')
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const { user, tokens } = await this.authService.login(dto);
@@ -59,6 +69,11 @@ export class AuthController {
     res.status(HttpStatus.OK).send({ user, access_token: access });
   }
 
+  /**
+   * Logout user
+   * @param req
+   * @param res
+   */
   @UseGuards(RefreshTokenGuard)
   @Post('logout')
   async logout(
@@ -74,6 +89,11 @@ export class AuthController {
     });
   }
 
+  /**
+   * Renew refresh token
+   * @param req
+   * @param res
+   */
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-tokens')
   async refreshToken(@Req() req: ICustomRequest, @Res() res: Response) {
@@ -90,6 +110,11 @@ export class AuthController {
     res.status(HttpStatus.OK).send({ user, access_token: access });
   }
 
+  /**
+   * Generate forget password token
+   * @param dto
+   * @param res
+   */
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto, @Res() res: Response) {
     const resetPasswordToken =
@@ -104,6 +129,11 @@ export class AuthController {
     });
   }
 
+  /**
+   * Reset user password
+   * @param dto
+   * @param res
+   */
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto, @Res() res: Response) {
     await this.authService.resetPassword(dto);
@@ -113,6 +143,11 @@ export class AuthController {
     });
   }
 
+  /**
+   * Send email verification email
+   * @param dto
+   * @param res
+   */
   @Post('send-verification-email')
   async sendVerificationEmail(
     @Body() dto: SendVerificationEmailDto,
@@ -129,6 +164,11 @@ export class AuthController {
     });
   }
 
+  /**
+   * Get user info
+   * @param req
+   * @param res
+   */
   @UseGuards(AccessTokenGuard)
   @Get('me')
   me(@Req() req: ICustomRequest, @Res() res: Response) {

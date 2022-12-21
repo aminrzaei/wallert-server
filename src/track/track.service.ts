@@ -4,7 +4,7 @@ import { Track } from '@prisma/client';
 import * as moment from 'moment';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ContactType, RequestUser } from 'types';
+import { ContactType, Post, RequestUser } from 'types';
 import { AddTrackDto } from './dto';
 
 @Injectable()
@@ -141,7 +141,7 @@ export class TrackService {
     return true;
   }
 
-  getLatestPosts(posts: any, lastPostToken: string) {
+  getLatestPosts(posts: any, lastPostToken: string): Post[] {
     const lastPostByTokenIndex: number = posts
       .map((post) => post.data.token)
       .indexOf(lastPostToken);
@@ -151,7 +151,7 @@ export class TrackService {
     return this.extractPostsData(posts.slice(0, lastPostByTokenIndex));
   }
 
-  extractPostsData(posts) {
+  extractPostsData(posts): Post[] {
     const POST_URl = 'https://divar.ir/v/';
     return posts.map((post) => {
       const postData = post.data;

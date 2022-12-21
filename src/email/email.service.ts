@@ -1,6 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer/dist';
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Post } from 'types';
 
 @Injectable()
 export class EmailService {
@@ -11,7 +12,7 @@ export class EmailService {
     private readonly mailerService: MailerService,
   ) {}
 
-  async sendResetPasswordEmail(to: string, token: string) {
+  async sendResetPasswordEmail(to: string, token: string): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to,
@@ -28,7 +29,7 @@ export class EmailService {
     }
   }
 
-  async sendVerificationEmail(to: string, token: string) {
+  async sendVerificationEmail(to: string, token: string): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to,
@@ -45,7 +46,11 @@ export class EmailService {
     }
   }
 
-  async sendTrackEmail(to: string, posts: any, trackTitle: string) {
+  async sendTrackEmail(
+    to: string,
+    posts: Post[],
+    trackTitle: string,
+  ): Promise<void> {
     try {
       await this.mailerService.sendMail({
         to,

@@ -13,7 +13,7 @@ import { CreateUserDate } from 'types';
 export class UserService {
   constructor(private prisma: PrismaService) {}
 
-  async createUser(createUserData: CreateUserDate) {
+  async createUser(createUserData: CreateUserDate): Promise<User> {
     try {
       const hashedPassword = await argon.hash(createUserData.password);
       const user = this.prisma.user.create({
@@ -32,7 +32,7 @@ export class UserService {
     }
   }
 
-  async getUserByEmail(email: string) {
+  async getUserByEmail(email: string): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: {
         email,
@@ -42,13 +42,16 @@ export class UserService {
     return user;
   }
 
-  async verifyPassword(dbHash: string, requestPassword: string) {
+  async verifyPassword(
+    dbHash: string,
+    requestPassword: string,
+  ): Promise<boolean> {
     const pwMatches = await argon.verify(dbHash, requestPassword);
     if (!pwMatches) throw new ForbiddenException('اطلاعات وارد شده نادرست است');
     return pwMatches;
   }
 
-  async getUserById(id: number) {
+  async getUserById(id: number): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: {
         id,
@@ -58,7 +61,10 @@ export class UserService {
     return user;
   }
 
-  async updateUserById(userId: number, updateBody: Partial<User>) {
+  async updateUserById(
+    userId: number,
+    updateBody: Partial<User>,
+  ): Promise<User> {
     try {
       if (updateBody.password) {
         const hashedPassword = await argon.hash(updateBody.password);
