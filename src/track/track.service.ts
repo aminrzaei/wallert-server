@@ -94,6 +94,18 @@ export class TrackService {
     });
   }
 
+  async getUserTracks(userId: number): Promise<Track[]> {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        tracks: true,
+      },
+    });
+    return user.tracks;
+  }
+
   async getTrackById(id: number, userId: number): Promise<Track> | never {
     const track = await this.prisma.track.findFirst({
       where: {
