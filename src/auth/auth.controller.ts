@@ -6,6 +6,7 @@ import {
   UseGuards,
   Req,
   Get,
+  HttpCode,
 } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common/enums';
 import { Response } from 'express';
@@ -36,6 +37,7 @@ export class AuthController {
    * @param dto
    * @param res
    */
+  @HttpCode(HttpStatus.CREATED)
   @Post('register')
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
     const { user, tokens } = await this.authService.register(dto);
@@ -47,7 +49,7 @@ export class AuthController {
       sameSite: 'none',
       expires: refresh.expires,
     });
-    res.status(HttpStatus.OK).send({ user, access_token: access });
+    res.send({ user, access_token: access });
   }
 
   /**
@@ -55,6 +57,7 @@ export class AuthController {
    * @param dto
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const { user, tokens } = await this.authService.login(dto);
@@ -66,7 +69,7 @@ export class AuthController {
       sameSite: 'none',
       expires: refresh.expires,
     });
-    res.status(HttpStatus.OK).send({ user, access_token: access });
+    res.send({ user, access_token: access });
   }
 
   /**
@@ -74,6 +77,7 @@ export class AuthController {
    * @param req
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
   @Post('logout')
   async logout(
@@ -83,7 +87,7 @@ export class AuthController {
     const refreshTokenId = req.user.refreshToken.id;
     await this.authService.logout(refreshTokenId);
     res.clearCookie('wallert_refresh_token');
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       message: 'از حساب کاربری خود خارج شدید',
     });
@@ -94,6 +98,7 @@ export class AuthController {
    * @param req
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @UseGuards(RefreshTokenGuard)
   @Post('refresh-tokens')
   async refreshToken(@Req() req: ICustomRequest, @Res() res: Response) {
@@ -107,7 +112,7 @@ export class AuthController {
       sameSite: 'none',
       expires: refresh.expires,
     });
-    res.status(HttpStatus.OK).send({ user, access_token: access });
+    res.send({ user, access_token: access });
   }
 
   /**
@@ -115,6 +120,7 @@ export class AuthController {
    * @param dto
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @Post('forgot-password')
   async forgotPassword(@Body() dto: ForgotPasswordDto, @Res() res: Response) {
     const resetPasswordToken =
@@ -123,7 +129,7 @@ export class AuthController {
       dto.email,
       resetPasswordToken,
     );
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       message: 'ایمیل تغییر پسورد برای شما ارسال شد',
     });
@@ -134,10 +140,11 @@ export class AuthController {
    * @param dto
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @Post('reset-password')
   async resetPassword(@Body() dto: ResetPasswordDto, @Res() res: Response) {
     await this.authService.resetPassword(dto);
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       message: 'تغییر پسورد با موفقیت انجام شد',
     });
@@ -148,6 +155,7 @@ export class AuthController {
    * @param dto
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @Post('send-verification-email')
   async sendVerificationEmail(
     @Body() dto: SendVerificationEmailDto,
@@ -157,7 +165,7 @@ export class AuthController {
       dto.email,
     );
     await this.emailService.sendVerificationEmail(dto.email, verifyEmailToken);
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       message:
         'ایمیل فعالسازی برای شما ارسال شد لطفا ایمیل خود را بررسی نمایید',

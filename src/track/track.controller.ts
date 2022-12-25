@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   Patch,
@@ -27,6 +28,7 @@ export class TrackController {
    * @param req
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AccessTokenGuard)
   @Post('')
   async add(
@@ -36,7 +38,7 @@ export class TrackController {
   ) {
     const user = req.user;
     await this.trackService.createTrack(dto, user);
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       message: 'ردیاب با موفقیت اضافه شد',
     });
@@ -49,6 +51,7 @@ export class TrackController {
    * @param req
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AccessTokenGuard)
   @Patch(':id')
   async updateTrackStatus(
@@ -69,7 +72,7 @@ export class TrackController {
     const newTrack = await this.trackService.updateTrack(track.id, {
       isActive: newStatus,
     });
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       message: `پیگیری با موفقیت ${
         IS_ACTIVE_STATUS[`${newTrack.isActive}`]
@@ -84,6 +87,7 @@ export class TrackController {
    * @param req
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AccessTokenGuard)
   @Delete(':id')
   async deleteTrack(
@@ -95,7 +99,7 @@ export class TrackController {
     const userId = req.user.id;
     const track = await this.trackService.getTrackById(trackId, userId);
     const deletedTrack = await this.trackService.deleteTrack(track.id);
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       message: `پیگیری ${deletedTrack.title} با موفقیت حذف شد`,
     });
@@ -106,12 +110,13 @@ export class TrackController {
    * @param req
    * @param res
    */
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AccessTokenGuard)
   @Get('')
   async getUserTracks(@Req() req: ICustomRequest, @Res() res: Response) {
     const userId = req.user.id;
     const tracks = await this.trackService.getUserTracks(userId);
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       tracks,
     });
@@ -123,7 +128,7 @@ export class TrackController {
    * @param req
    * @param res
    */
-
+  @HttpCode(HttpStatus.OK)
   @UseGuards(AccessTokenGuard)
   @Get(':id')
   async getTrack(
@@ -134,7 +139,7 @@ export class TrackController {
     const trackId = Number(params.id);
     const userId = req.user.id;
     const track = await this.trackService.getTrackById(trackId, userId);
-    res.status(HttpStatus.OK).send({
+    res.send({
       statusCode: 200,
       track,
     });
