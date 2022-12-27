@@ -4,7 +4,7 @@ import { Track } from '@prisma/client';
 import * as moment from 'moment';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { ContactType, Post, RequestUser } from 'types';
+import { ContactType, Post, RequestUser } from '../../types';
 import { AddTrackDto } from './dto';
 
 @Injectable()

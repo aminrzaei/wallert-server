@@ -5,7 +5,7 @@ import { Token } from '@prisma/client';
 import * as moment from 'moment';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
-import { JwtPayload, TokenTypes } from 'types';
+import { JwtPayload, TokenTypes } from '../../types';
 
 @Injectable()
 export class TokenService {

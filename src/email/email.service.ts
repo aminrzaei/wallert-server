@@ -1,7 +1,7 @@
 import { MailerService } from '@nestjs-modules/mailer/dist';
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Post } from 'types';
+import { Post } from '../../types';
 
 @Injectable()
 export class EmailService {

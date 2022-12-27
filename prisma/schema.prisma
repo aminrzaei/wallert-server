@@ -28,7 +28,7 @@ model Track {
   lastCheckTime  String
   userId         Int
   isActive       Boolean @default(true)
-  user           User    @relation(fields: [userId], references: [id])
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Token {
@@ -38,7 +38,7 @@ model Token {
   expires       String
   isBlacklisted Boolean @default(false)
   userId        Int
-  user          User    @relation(fields: [userId], references: [id])
+  user          User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Order {
@@ -49,5 +49,5 @@ model Order {
   transactionCode String
   pid             String
   userId          Int
-  user            User   @relation(fields: [userId], references: [id])
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -5,7 +5,6 @@ import {
   Res,
   UseGuards,
   Req,
-  Get,
   HttpCode,
 } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common/enums';
@@ -21,8 +20,7 @@ import {
   ResetPasswordDto,
   SendVerificationEmailDto,
 } from './dto';
-import { ICustomRequest } from 'types';
-import { AccessTokenGuard } from './guards/accessToken.guard';
+import { ICustomRequest } from '../../types';
 
 @Controller('auth')
 export class AuthController {
@@ -170,16 +168,5 @@ export class AuthController {
       message:
         'ایمیل فعالسازی برای شما ارسال شد لطفا ایمیل خود را بررسی نمایید',
     });
-  }
-
-  /**
-   * Get user info
-   * @param req
-   * @param res
-   */
-  @UseGuards(AccessTokenGuard)
-  @Get('me')
-  me(@Req() req: ICustomRequest, @Res() res: Response) {
-    res.send(req.user);
   }
 }

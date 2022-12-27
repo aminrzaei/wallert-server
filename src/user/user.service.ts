@@ -7,7 +7,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime';
 import { User } from '@prisma/client';
-import { CreateUserDate } from 'types';
+import { CreateUserDate } from '../../types';
 
 @Injectable()
 export class UserService {

@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.guard';
-import { ICustomRequest } from 'types';
+import { ICustomRequest } from '../../types';
 import { AddTrackDto, UpdateStatusDto } from './dto';
 import { TrackService } from './track.service';
 
