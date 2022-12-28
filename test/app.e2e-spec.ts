@@ -387,9 +387,35 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  // describe('User', () => {
-  //   describe('Get user info', () => {});
-  // });
+  describe('User', () => {
+    describe('Get user info', () => {
+      it('Should get user infos', () => {
+        return pactum
+          .spec()
+          .get('/user/me')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(200)
+          .expectJsonSchema({
+            type: 'object',
+            properties: {
+              user: {
+                type: 'object',
+              },
+            },
+          });
+      });
+      it('Should throw if invalid auth header', () => {
+        return pactum
+          .spec()
+          .get('/user/me')
+          .withHeaders('Authorization', 'Bearer INVALIDTOKEN')
+          .expectStatus(401);
+      });
+      it('Should throw if no auth header', () => {
+        return pactum.spec().get('/user/me').expectStatus(401);
+      });
+    });
+  });
 
   // describe('Track', () => {
   //   describe('Add Track', () => {});
