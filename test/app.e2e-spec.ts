@@ -34,8 +34,20 @@ describe('AppController (e2e)', () => {
   });
 
   describe('Auth', () => {
-    describe('Send Verification Email', () => {
-      it.todo('Should send verification email');
+    describe('Send verification email', () => {
+      it('Should send verification email', () => {
+        return pactum
+          .spec()
+          .post('/auth/send-verification-email')
+          .withBody({ email: 'my.aminrezaei@gmail.com' })
+          .expectStatus(200);
+      });
+      it('Should throw if no email provided', () => {
+        return pactum
+          .spec()
+          .post('/auth/send-verification-email')
+          .expectStatus(400);
+      });
     });
     describe('Register', () => {});
     describe('Login', () => {});
