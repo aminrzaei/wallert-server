@@ -47,7 +47,7 @@ export class AuthController {
       sameSite: 'none',
       expires: refresh.expires,
     });
-    res.send({ user, access_token: access });
+    res.send({ statusCode: 201, user, access_token: access });
   }
 
   /**
@@ -67,7 +67,7 @@ export class AuthController {
       sameSite: 'none',
       expires: refresh.expires,
     });
-    res.send({ user, access_token: access });
+    res.send({ statusCode: 200, user, access_token: access });
   }
 
   /**
@@ -110,7 +110,7 @@ export class AuthController {
       sameSite: 'none',
       expires: refresh.expires,
     });
-    res.send({ user, access_token: access });
+    res.send({ statusCode: 200, user, access_token: access });
   }
 
   /**

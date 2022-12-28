@@ -13,6 +13,6 @@ export class UserController {
   @UseGuards(AccessTokenGuard)
   @Get('me')
   me(@Req() req: ICustomRequest, @Res() res: Response) {
-    res.send(req.user);
+    res.send({ statusCode: 200, user: req.user });
   }
 }
