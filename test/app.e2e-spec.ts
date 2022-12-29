@@ -30,7 +30,7 @@ describe('AppController (e2e)', () => {
     tokenService = app.get(TokenService);
     await prisma.cleanDb();
     pactum.request.setBaseUrl('http://localhost:3333');
-  });
+  }, 10000);
 
   afterAll(() => {
     app.close();
@@ -38,13 +38,13 @@ describe('AppController (e2e)', () => {
 
   describe('Auth', () => {
     describe('Send verification email', () => {
-      it('Should send verification email', () => {
+      it('Should send verification email', async () => {
         return pactum
           .spec()
           .post('/auth/send-verification-email')
           .withBody({ email: 'my.aminrezaei@gmail.com' })
           .expectStatus(200);
-      }, 10000);
+      }, 8000);
       it('Should throw if no email provided', () => {
         return pactum
           .spec()
@@ -270,13 +270,13 @@ describe('AppController (e2e)', () => {
       });
     });
     describe('Forgot Password', () => {
-      it('Should send forget password email', () => {
+      it('Should send forget password email', async () => {
         return pactum
           .spec()
           .post('/auth/forgot-password')
           .withBody({ email: 'my.aminrezaei@gmail.com' })
           .expectStatus(200);
-      }, 10000);
+      }, 8000);
       it('Should throw if invalid email', () => {
         return pactum
           .spec()
@@ -374,7 +374,7 @@ describe('AppController (e2e)', () => {
       });
     });
     describe('Logout', () => {
-      it('Should logout', async () => {
+      it('Should logout', () => {
         return pactum
           .spec()
           .post('/auth/logout')
@@ -417,11 +417,299 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  // describe('Track', () => {
-  //   describe('Add Track', () => {});
-  //   describe('Edit Track', () => {});
-  //   describe('Get All Tracks', () => {});
-  //   describe('Get Specific Track', () => {});
-  //   describe('Delete Track', () => {});
-  // });
+  describe('Track', () => {
+    describe('Add Track', () => {
+      it('Should add track', () => {
+        pactum.handler.addCaptureHandler('trackid', (ctx) => {
+          return ctx.res.body.track.id;
+        });
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            interval: 5,
+            query: 'https://divar.ir/s/iran?cities=14%2C843',
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(201)
+          .stores('TrackId', '#trackid');
+      });
+      it('Should throw if no auth header', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            interval: 5,
+            query: 'https://divar.ir/s/iran?cities=14%2C843',
+          })
+          .expectStatus(401);
+      });
+      it('Should throw if invalid auth header', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            interval: 5,
+            query: 'https://divar.ir/s/iran?cities=14%2C843',
+          })
+          .withHeaders('Authorization', 'Bearer INVALIDTOKEN')
+          .expectStatus(401);
+      });
+      it('Should throw if no title', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            interval: 5,
+            query: 'https://divar.ir/s/iran?cities=14%2C843',
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if too short title', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'S',
+            interval: 5,
+            query: 'https://divar.ir/s/iran?cities=14%2C843',
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if no interval', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            query: 'https://divar.ir/s/iran?cities=14%2C843',
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if invalid interval', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            interval: 7,
+            query: 'https://divar.ir/s/iran?cities=14%2C843',
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if no query', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            interval: 5,
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if invalid query', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            interval: 5,
+            query: 'INVALIDQUERY',
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if not divar query', () => {
+        return pactum
+          .spec()
+          .post('/track')
+          .withBody({
+            title: 'Some fancy title',
+            interval: 5,
+            query: 'https://www.google.com',
+          })
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+    });
+    describe('Edit Track Status By Id', () => {
+      it('Should edit track status by id', () => {
+        return pactum
+          .spec()
+          .patch('/track/{id}/status')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .withBody({
+            isActive: false,
+          })
+          .expectStatus(200)
+          .expectJsonLike({
+            isActive: true,
+          });
+      });
+      it('Should throw if no auth header', () => {
+        return pactum
+          .spec()
+          .patch('/track/{id}/status')
+          .withPathParams('id', '$S{TrackId}')
+          .withBody({
+            isActive: false,
+          })
+          .expectStatus(401);
+      });
+      it('Should throw if invalid auth header', () => {
+        return pactum
+          .spec()
+          .patch('/track/{id}/status')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer INVALIDTOKEN')
+          .withBody({
+            isActive: false,
+          })
+          .expectStatus(401);
+      });
+      it('Should throw if not found id param', () => {
+        return pactum
+          .spec()
+          .patch('/track/{id}/status')
+          .withPathParams('id', 2556)
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .withBody({
+            isActive: false,
+          })
+          .expectStatus(404);
+      });
+      it('Should throw if no id param', () => {
+        return pactum
+          .spec()
+          .patch('/track/{id}/status')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .withBody({
+            isActive: false,
+          })
+          .expectStatus(400);
+      });
+      it('Should throw if no body', () => {
+        return pactum
+          .spec()
+          .patch('/track/{id}/status')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if invalid active status', () => {
+        return pactum
+          .spec()
+          .patch('/track/{id}/status')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .withBody({
+            isActive: 'INVALIDSTATUS',
+          })
+          .expectStatus(400);
+      });
+    });
+
+    describe('Get All Tracks', () => {
+      it('Should get all user tracks', () => {
+        return pactum
+          .spec()
+          .get('/track')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(200)
+          .expectJsonLength('tracks', 1);
+      });
+      it('Should throw if no auth header', () => {
+        return pactum.spec().get('/track').expectStatus(401);
+      });
+    });
+    describe('Get Specific Track', () => {
+      it('Should get specific track', () => {
+        return pactum
+          .spec()
+          .get('/track/{id}')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(200);
+      });
+      it('Should throw if no param', () => {
+        return pactum
+          .spec()
+          .get('/track/{id}')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if not found param', () => {
+        return pactum
+          .spec()
+          .get('/track/{id}')
+          .withPathParams('id', 2556)
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(404);
+      });
+      it('Should throw if no auth header', () => {
+        return pactum
+          .spec()
+          .get('/track/{id}')
+          .withPathParams('id', '$S{TrackId}')
+          .expectStatus(401);
+      });
+      it('Should throw if invalid auth header', () => {
+        return pactum
+          .spec()
+          .get('/track/{id}')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer INVALIDTOKEN')
+          .expectStatus(401);
+      });
+    });
+    describe('Delete Track', () => {
+      it('Should delete track by id', () => {
+        return pactum
+          .spec()
+          .delete('/track/{id}')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(200);
+      });
+      it('Should throw if no param', () => {
+        return pactum
+          .spec()
+          .delete('/track/{id}')
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(400);
+      });
+      it('Should throw if not foumd param', () => {
+        return pactum
+          .spec()
+          .delete('/track/{id}')
+          .withPathParams('id', 2556)
+          .withHeaders('Authorization', 'Bearer $S{UserAccessToken}')
+          .expectStatus(404);
+      });
+      it('Should throw if no auth header', () => {
+        return pactum
+          .spec()
+          .delete('/track/{id}')
+          .withPathParams('id', '$S{TrackId}')
+          .expectStatus(401);
+      });
+      it('Should throw if invalid auth header', () => {
+        return pactum
+          .spec()
+          .delete('/track/{id}')
+          .withPathParams('id', '$S{TrackId}')
+          .withHeaders('Authorization', 'Bearer INVALID')
+          .expectStatus(401);
+      });
+    });
+  });
 });

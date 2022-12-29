@@ -12,6 +12,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common/exceptions/bad-request.exception';
 import { Response } from 'express';
 import { AccessTokenGuard } from 'src/auth/guards/accessToken.guard';
 import { ICustomRequest } from '../../types';
@@ -28,7 +29,7 @@ export class TrackController {
    * @param req
    * @param res
    */
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @UseGuards(AccessTokenGuard)
   @Post('')
   async add(
@@ -37,10 +38,11 @@ export class TrackController {
     @Res() res: Response,
   ) {
     const user = req.user;
-    await this.trackService.createTrack(dto, user);
+    const track = await this.trackService.createTrack(dto, user);
     res.send({
-      statusCode: 200,
-      message: 'ردیاب با موفقیت اضافه شد',
+      statusCode: 201,
+      message: 'پیگیری با موفقیت اضافه شد',
+      track,
     });
   }
 
@@ -53,7 +55,7 @@ export class TrackController {
    */
   @HttpCode(HttpStatus.OK)
   @UseGuards(AccessTokenGuard)
-  @Patch(':id')
+  @Patch(':id/status')
   async updateTrackStatus(
     @Param() params: { id: string },
     @Body() dto: UpdateStatusDto,
@@ -61,8 +63,9 @@ export class TrackController {
     @Res() res: Response,
   ) {
     const { isActive } = dto;
-    const trackId = Number(params.id);
     const userId = req.user.id;
+    const trackId = Number(params.id);
+    if (trackId != Number(trackId)) throw new BadRequestException();
     const IS_ACTIVE_STATUS = {
       true: 'فعال',
       false: 'غیرفعال',
@@ -95,8 +98,9 @@ export class TrackController {
     @Req() req: ICustomRequest,
     @Res() res: Response,
   ) {
-    const trackId = Number(params.id);
     const userId = req.user.id;
+    const trackId = Number(params.id);
+    if (trackId != Number(trackId)) throw new BadRequestException();
     const track = await this.trackService.getTrackById(trackId, userId);
     const deletedTrack = await this.trackService.deleteTrack(track.id);
     res.send({
@@ -136,8 +140,9 @@ export class TrackController {
     @Req() req: ICustomRequest,
     @Res() res: Response,
   ) {
-    const trackId = Number(params.id);
     const userId = req.user.id;
+    const trackId = Number(params.id);
+    if (trackId != Number(trackId)) throw new BadRequestException();
     const track = await this.trackService.getTrackById(trackId, userId);
     res.send({
       statusCode: 200,
