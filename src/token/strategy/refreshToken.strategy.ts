@@ -6,6 +6,8 @@ import { TokenService } from '../token.service';
 import { Injectable } from '@nestjs/common/decorators';
 
 const cookieExtractor = (req: Request) => {
+  console.log(req);
+
   let token = null;
   if (req && req.cookies) {
     token = req.cookies['wallert_refresh_token'];

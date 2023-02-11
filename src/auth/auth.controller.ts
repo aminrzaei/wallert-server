@@ -40,10 +40,9 @@ export class AuthController {
   async register(@Body() dto: RegisterDto, @Res() res: Response) {
     const { user, tokens } = await this.authService.register(dto);
     const { access, refresh } = tokens;
-    const doUseSecureCoockie = process.env.NODE_ENV === 'production';
     res.cookie('wallert_refresh_token', refresh.token, {
       httpOnly: true,
-      secure: doUseSecureCoockie,
+      secure: true,
       sameSite: 'none',
       expires: refresh.expires,
     });
@@ -60,10 +59,9 @@ export class AuthController {
   async login(@Body() dto: LoginDto, @Res() res: Response) {
     const { user, tokens } = await this.authService.login(dto);
     const { access, refresh } = tokens;
-    const doUseSecureCoockie = process.env.NODE_ENV === 'production';
     res.cookie('wallert_refresh_token', refresh.token, {
       httpOnly: true,
-      secure: doUseSecureCoockie,
+      secure: true,
       sameSite: 'none',
       expires: refresh.expires,
     });
@@ -103,10 +101,9 @@ export class AuthController {
     const userId = req.user.sub;
     const { user, tokens } = await this.authService.refreshAuth(userId);
     const { access, refresh } = tokens;
-    const doUseSecureCoockie = process.env.NODE_ENV === 'production';
     res.cookie('wallert_refresh_token', refresh.token, {
       httpOnly: true,
-      secure: doUseSecureCoockie,
+      secure: true,
       sameSite: 'none',
       expires: refresh.expires,
     });

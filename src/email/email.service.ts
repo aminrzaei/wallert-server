@@ -38,7 +38,7 @@ export class EmailService {
         template: 'verify-email',
         context: {
           // Data to be sent to template engine.
-          url: `${this.FRONTEND_URL}/register?token=${token}`,
+          url: `${this.FRONTEND_URL}/auth/complete-register?token=${token}`,
         },
       });
     } catch (error) {

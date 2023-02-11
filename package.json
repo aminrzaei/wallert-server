@@ -31,7 +31,11 @@
     "pretest:e2e": "npm run db:test:restart",
     "test:e2e": "dotenv -e .env.test -- jest --no-cache --config ./test/jest-e2e.json",
     "pretest:e2e:watch": "npm run db:test:restart",
-    "test:e2e:watch": "dotenv -e .env.test -- jest --watch --no-cache --config ./test/jest-e2e.json"
+    "test:e2e:watch": "dotenv -e .env.test -- jest --watch --no-cache --config ./test/jest-e2e.json",
+    "pretest:int": "npm run db:test:restart",
+    "test:int": "dotenv -e .env.test -- jest -i --no-cache --config jest-int.json",
+    "pretest:int:watch": "npm run db:test:restart",
+    "test:int:watch": "dotenv -e .env.test -- jest -i --no-cache --watch --config jest-int.json"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.8.1",

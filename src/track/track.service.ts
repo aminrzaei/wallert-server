@@ -38,44 +38,44 @@ export class TrackService {
     return { postToken: lastPost.data.token };
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
-  async tracking() {
-    const tracks = await this.prisma.track.findMany();
-    const tracksLen = tracks.length;
-    let i = 0;
-    while (i < tracksLen) {
-      const track = tracks[i];
-      const {
-        id,
-        title,
-        isActive,
-        contactType,
-        contactAddress,
-        lastCheckTime,
-        interval,
-        query,
-        lastPostToken,
-      } = track;
-      i++;
-      if (!this.isVaildToTrack(isActive, lastCheckTime, interval)) continue;
-      const posts = await this.getPosts(query);
-      const latestPosts = this.getLatestPosts(posts, lastPostToken);
-      if (latestPosts.length !== 0) {
-        const updateTrackData = {
-          lastCheckTime: moment().format(),
-          lastPostToken: latestPosts[0].token as string,
-        };
-        await this.updateTrack(id, updateTrackData);
-        if (contactType === ContactType.EMAIL) {
-          await this.emailService.sendTrackEmail(
-            contactAddress,
-            latestPosts,
-            title,
-          );
-        }
-      }
-    }
-  }
+  // @Cron(CronExpression.EVERY_MINUTE)
+  // async tracking() {
+  //   const tracks = await this.prisma.track.findMany();
+  //   const tracksLen = tracks.length;
+  //   let i = 0;
+  //   while (i < tracksLen) {
+  //     const track = tracks[i];
+  //     const {
+  //       id,
+  //       title,
+  //       isActive,
+  //       contactType,
+  //       contactAddress,
+  //       lastCheckTime,
+  //       interval,
+  //       query,
+  //       lastPostToken,
+  //     } = track;
+  //     i++;
+  //     if (!this.isVaildToTrack(isActive, lastCheckTime, interval)) continue;
+  //     const posts = await this.getPosts(query);
+  //     const latestPosts = this.getLatestPosts(posts, lastPostToken);
+  //     if (latestPosts.length !== 0) {
+  //       const updateTrackData = {
+  //         lastCheckTime: moment().format(),
+  //         lastPostToken: latestPosts[0].token as string,
+  //       };
+  //       await this.updateTrack(id, updateTrackData);
+  //       if (contactType === ContactType.EMAIL) {
+  //         await this.emailService.sendTrackEmail(
+  //           contactAddress,
+  //           latestPosts,
+  //           title,
+  //         );
+  //       }
+  //     }
+  //   }
+  // }
 
   updateTrack(trackId: number, updateData: Partial<Track>): Promise<Track> {
     return this.prisma.track.update({
