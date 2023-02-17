@@ -14,7 +14,7 @@ CREATE TABLE `Track` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(191) NOT NULL,
     `interval` INTEGER NOT NULL,
-    `query` VARCHAR(191) NOT NULL,
+    `query` VARCHAR(400) NOT NULL,
     `contactType` VARCHAR(191) NOT NULL,
     `contactAddress` VARCHAR(191) NOT NULL,
     `lastPostToken` VARCHAR(191) NOT NULL,

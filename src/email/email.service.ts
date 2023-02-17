@@ -21,7 +21,7 @@ export class EmailService {
         template: 'reset-password',
         context: {
           // Data to be sent to template engine.
-          url: `${this.FRONTEND_URL}/reset-password?token=${token}`,
+          url: `${this.FRONTEND_URL}/auth/reset-password?token=${token}`,
         },
       });
     } catch (error) {
