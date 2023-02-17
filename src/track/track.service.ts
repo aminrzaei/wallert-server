@@ -16,8 +16,6 @@ export class TrackService {
   async createTrack(dto: AddTrackDto, user: RequestUser) {
     const { title, interval, query } = dto;
     const { postToken: lastPostToken } = await this.getLastpost(query);
-    String;
-    String;
     return this.prisma.track.create({
       data: {
         title,
@@ -33,49 +31,53 @@ export class TrackService {
   }
 
   async getLastpost(query: string) {
-    const posts = await this.getPosts(query);
-    const lastPost = posts[0];
+    const res = await this.getPosts(query);
+    if (res[0].widget_type === 'SEARCH_SUGGESTION') {
+      const lastPost = res[1];
+      return { postToken: lastPost.data.token };
+    }
+    const lastPost = res[0];
     return { postToken: lastPost.data.token };
   }
 
-  // @Cron(CronExpression.EVERY_MINUTE)
-  // async tracking() {
-  //   const tracks = await this.prisma.track.findMany();
-  //   const tracksLen = tracks.length;
-  //   let i = 0;
-  //   while (i < tracksLen) {
-  //     const track = tracks[i];
-  //     const {
-  //       id,
-  //       title,
-  //       isActive,
-  //       contactType,
-  //       contactAddress,
-  //       lastCheckTime,
-  //       interval,
-  //       query,
-  //       lastPostToken,
-  //     } = track;
-  //     i++;
-  //     if (!this.isVaildToTrack(isActive, lastCheckTime, interval)) continue;
-  //     const posts = await this.getPosts(query);
-  //     const latestPosts = this.getLatestPosts(posts, lastPostToken);
-  //     if (latestPosts.length !== 0) {
-  //       const updateTrackData = {
-  //         lastCheckTime: moment().format(),
-  //         lastPostToken: latestPosts[0].token as string,
-  //       };
-  //       await this.updateTrack(id, updateTrackData);
-  //       if (contactType === ContactType.EMAIL) {
-  //         await this.emailService.sendTrackEmail(
-  //           contactAddress,
-  //           latestPosts,
-  //           title,
-  //         );
-  //       }
-  //     }
-  //   }
-  // }
+  @Cron(CronExpression.EVERY_MINUTE)
+  async tracking() {
+    const tracks = await this.prisma.track.findMany();
+    const tracksLen = tracks.length;
+    let i = 0;
+    while (i < tracksLen) {
+      const track = tracks[i];
+      const {
+        id,
+        title,
+        isActive,
+        contactType,
+        contactAddress,
+        lastCheckTime,
+        interval,
+        query,
+        lastPostToken,
+      } = track;
+      i++;
+      if (!this.isVaildToTrack(isActive, lastCheckTime, interval)) continue;
+      const posts = await this.getPosts(query);
+      const latestPosts = this.getLatestPosts(posts, lastPostToken);
+      if (latestPosts.length !== 0) {
+        const updateTrackData = {
+          lastCheckTime: moment().format(),
+          lastPostToken: latestPosts[0].token as string,
+        };
+        await this.updateTrack(id, updateTrackData);
+        if (contactType === ContactType.EMAIL) {
+          await this.emailService.sendTrackEmail(
+            contactAddress,
+            latestPosts,
+            title,
+          );
+        }
+      }
+    }
+  }
 
   updateTrack(trackId: number, updateData: Partial<Track>): Promise<Track> {
     return this.prisma.track.update({
