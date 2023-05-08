@@ -20,14 +20,14 @@ import { ScheduleModule } from '@nestjs/schedule';
       transport: {
         host: process.env.EMAIL_HOST,
         port: Number(process.env.EMAIL_PORT),
-        secure: false, // true for 465, false for other ports
+        secure: false,
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
       },
       defaults: {
-        from: '"Wallert" <wallert@info.ir>',
+        from: '"Wallert" <info@moonde.ir>',
       },
       template: {
         dir: __dirname + '/email/templates',

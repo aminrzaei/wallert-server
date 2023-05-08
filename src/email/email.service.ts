@@ -16,7 +16,7 @@ export class EmailService {
     try {
       await this.mailerService.sendMail({
         to,
-        from: 'wallert@info.ir',
+        from: 'info@moonde.ir',
         subject: 'بازنشانی رمز عبور حساب',
         template: 'reset-password',
         context: {
@@ -33,7 +33,7 @@ export class EmailService {
     try {
       await this.mailerService.sendMail({
         to,
-        from: 'wallert@info.ir',
+        from: 'info@moonde.ir',
         subject: 'فعالسازی حساب کاربری',
         template: 'verify-email',
         context: {
@@ -54,7 +54,7 @@ export class EmailService {
     try {
       await this.mailerService.sendMail({
         to,
-        from: 'wallert@info.ir',
+        from: 'info@moonde.ir',
         subject: `آگهی های جدید: ${trackTitle}`,
         template: 'track',
         context: {
