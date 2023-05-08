@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Track } from '@prisma/client';
 import * as moment from 'moment';
+import fetch from 'node-fetch';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ContactType, Post, RequestUser } from '../../types';
