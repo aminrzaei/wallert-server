@@ -11,7 +11,7 @@ async function bootstrap() {
       origin: FRONTEND_URL,
       allowedHeaders:
         'Origin, X-Requested-With, Content-Type, Accept ,Authorization',
-      methods: 'GET, POST, PUT, DELETE, OPTIONS',
+      methods: 'GET, POST, PUT, DELETE, OPTIONS, PATCH',
       credentials: true,
     },
   });
