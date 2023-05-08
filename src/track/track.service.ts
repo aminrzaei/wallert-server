@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Track } from '@prisma/client';
 import * as moment from 'moment';
-import fetch from 'node-fetch';
+import axios from 'axios';
 import { EmailService } from 'src/email/email.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ContactType, Post, RequestUser } from '../../types';
@@ -124,9 +124,8 @@ export class TrackService {
     const API_URL = 'https://api.divar.ir/v8/web-search/';
     const WEB_URL = 'https://divar.ir/s/';
     const apiQuery = query.replace(WEB_URL, API_URL);
-    const response = await fetch(apiQuery);
-    const body = await response.json();
-    return body.web_widgets.post_list;
+    const response = (await axios.get(apiQuery)) as any;
+    return response.data.web_widgets.post_list;
   }
 
   isVaildToTrack(
